@@ -1,0 +1,25 @@
+Analyzing SQL dump: /mnt/d/dropbox/frankbria.com/website/dbxtyzpkptvrym.sql
+
+=== Database Info ===
+  - Table prefix: fr_
+  - Total tables: 117
+
+=== Published Content by Type ===
+  - post: 35
+  - jb_store_css: 2
+  - pys_event: 1
+  - page: 1
+
+=== All Posts by Status ===
+  - inherit: 161
+  - publish: 39
+  - draft: 2
+  - trash: 1
+
+=== Terms (Categories/Tags) ===
+  - Total terms: 2
+
+=== File Size ===
+  - SQL dump size: 41.25 MB
+
+✅ Analysis complete!
