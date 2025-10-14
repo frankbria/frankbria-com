@@ -3,3 +3,29 @@ node_modules/
 .next/
 .env.local
 .env.server
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Migration logs
+*.log
+migration-output*.log
+migration_output*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
