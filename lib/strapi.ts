@@ -12,28 +12,21 @@ export const strapiClient = axios.create({
 
 export async function getAllPosts() {
   try {
-    console.log('🔍 Fetching posts from:', strapiUrl);
-    console.log('🔑 Token available:', strapiToken ? `Yes (${strapiToken.substring(0, 20)}...)` : 'NO TOKEN!');
-    // Fetch with pagination to get all posts
+    // Fetch with pagination to get all posts (default page size is 25)
     const response = await strapiClient.get('/posts?populate=*&sort=publishedDate:desc&pagination[pageSize]=100');
-    console.log('✅ Posts fetched successfully:', response.data.data?.length || 0, 'posts');
     return response.data.data;
   } catch (error: any) {
-    console.error('❌ Error fetching posts:', error.message);
-    console.error('❌ Status:', error.response?.status);
-    console.error('❌ Response:', error.response?.data);
+    console.error('Error fetching posts:', error.message);
     return [];
   }
 }
 
 export async function getPostBySlug(slug: string) {
   try {
-    console.log('🔍 Fetching post with slug:', slug);
     const response = await strapiClient.get(`/posts?filters[slug][$eq]=${slug}&populate=*`);
     const rawPost = response.data.data[0] || null;
 
     if (!rawPost) {
-      console.log('❌ Post not found for slug:', slug);
       return null;
     }
 
@@ -60,12 +53,9 @@ export async function getPostBySlug(slug: string) {
       }
     };
 
-    console.log('✅ Post found and normalized');
     return post;
   } catch (error: any) {
-    console.error('❌ Error fetching post by slug:', slug);
-    console.error('❌ Error message:', error.message);
-    console.error('❌ Status:', error.response?.status);
+    console.error('Error fetching post by slug:', slug, error.message);
     return null;
   }
 }
