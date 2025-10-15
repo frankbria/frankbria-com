@@ -2358,6 +2358,16 @@ git commit -m "feat: add automated deployment script"
 - [x] SSL certificate active
 - [x] Strapi upload images serving correctly via nginx
 
+### Design & Polish 🎨
+- [ ] **Homepage Images**: Replace placeholder images with actual images
+  - [ ] Frank Bria headshot (currently gray box placeholder)
+  - [ ] Six venture card images (currently gray box placeholders)
+  - [ ] Upload images to Strapi media library
+  - [ ] Update homepage component to use actual image URLs
+- [ ] **Blog Post Images**: Add featured images to blog posts
+- [ ] **Footer Logos**: Add social media icons/logos
+- [ ] **Favicon**: Add site favicon
+
 ### Testing & Validation ✅
 - [x] Automated content parity validation (100% pass)
 - [ ] Manual testing checklist completed
