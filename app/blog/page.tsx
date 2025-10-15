@@ -1,5 +1,7 @@
 import { getAllPosts } from '@/lib/strapi';
 import Link from 'next/link';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
@@ -7,38 +9,35 @@ export default async function BlogPage() {
   const posts = await getAllPosts();
 
   return (
-    <main className="min-h-screen p-8 max-w-4xl mx-auto">
-      <h1 className="text-4xl font-bold mb-8">Blog</h1>
+    <>
+      <Header />
+      <main className="min-h-screen">
+        <div className="max-w-6xl mx-auto px-4 py-12">
+          <h1 className="text-4xl font-bold mb-12 text-center">BLOG</h1>
 
-      <div className="space-y-8">
-        {posts.map((post: any) => (
-          <article key={post.id} className="border-b pb-6">
-            <Link href={`/blog/${post.attributes.slug}`}>
-              <h2 className="text-2xl font-semibold text-blue-600 hover:underline">
-                {post.attributes.title}
-              </h2>
-            </Link>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {posts.map((post: any) => (
+              <article key={post.id} className="border-b border-gray-200 pb-8">
+                {/* Featured image placeholder */}
+                <Link href={`/blog/${post.attributes.slug}`}>
+                  <div className="w-full h-48 bg-gray-200 rounded mb-4"></div>
+                </Link>
 
-            {post.attributes.excerpt && (
-              <p className="text-gray-700 mt-3">{post.attributes.excerpt}</p>
-            )}
+                <h2 className="text-2xl font-semibold mb-3">
+                  <Link href={`/blog/${post.attributes.slug}`} className="text-gray-900 hover:text-blue-600 transition-colors">
+                    {post.attributes.title}
+                  </Link>
+                </h2>
 
-            <div className="flex gap-4 items-center mt-3 text-sm text-gray-600">
-              <time>
-                {new Date(post.attributes.publishedDate).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
-              </time>
-
-              {post.attributes.author && (
-                <span>By {post.attributes.author}</span>
-              )}
-            </div>
-          </article>
-        ))}
-      </div>
-    </main>
+                {post.attributes.excerpt && (
+                  <p className="text-gray-700 mb-3 leading-relaxed">{post.attributes.excerpt}</p>
+                )}
+              </article>
+            ))}
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </>
   );
 }
