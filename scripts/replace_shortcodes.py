@@ -17,7 +17,7 @@ load_dotenv('.env.server')
 
 STRAPI_URL = os.getenv('STRAPI_URL', 'http://localhost:1337')
 STRAPI_API_TOKEN = os.getenv('STRAPI_API_TOKEN')
-SPOTIFY_SHOW_ID = os.getenv('SPOTIFY_SHOW_ID', 'YOUR_SHOW_ID')  # Update this
+SPOTIFY_SHOW_ID = os.getenv('SPOTIFY_SHOW_ID', '0xcYcgrzcnsff0mkNX0fGh')
 
 # Dry run mode - won't actually update Strapi
 DRY_RUN = True
