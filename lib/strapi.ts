@@ -30,8 +30,37 @@ export async function getPostBySlug(slug: string) {
   try {
     console.log('🔍 Fetching post with slug:', slug);
     const response = await strapiClient.get(`/posts?filters[slug][$eq]=${slug}&populate=*`);
-    const post = response.data.data[0] || null;
-    console.log(post ? '✅ Post found' : '❌ Post not found for slug:', slug);
+    const rawPost = response.data.data[0] || null;
+
+    if (!rawPost) {
+      console.log('❌ Post not found for slug:', slug);
+      return null;
+    }
+
+    // Strapi 5 returns flat structure for filtered queries, but we need attributes wrapper for consistency
+    // Check if it already has attributes (collection format) or needs wrapping (flat format)
+    const post = rawPost.attributes ? rawPost : {
+      id: rawPost.id,
+      documentId: rawPost.documentId,
+      attributes: {
+        title: rawPost.title,
+        slug: rawPost.slug,
+        content: rawPost.content,
+        excerpt: rawPost.excerpt,
+        publishedDate: rawPost.publishedDate,
+        author: rawPost.author,
+        seoTitle: rawPost.seoTitle,
+        seoDescription: rawPost.seoDescription,
+        wpPostId: rawPost.wpPostId,
+        createdAt: rawPost.createdAt,
+        updatedAt: rawPost.updatedAt,
+        publishedAt: rawPost.publishedAt,
+        featuredImage: rawPost.featuredImage,
+        categories: rawPost.categories,
+      }
+    };
+
+    console.log('✅ Post found and normalized');
     return post;
   } catch (error: any) {
     console.error('❌ Error fetching post by slug:', slug);

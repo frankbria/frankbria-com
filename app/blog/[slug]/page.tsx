@@ -21,14 +21,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const post = await getPostBySlug(slug);
 
-  console.log('📄 Post object:', JSON.stringify(post, null, 2));
-
   if (!post) {
-    notFound();
-  }
-
-  if (!post.attributes) {
-    console.error('❌ Post missing attributes!', post);
     notFound();
   }
 
