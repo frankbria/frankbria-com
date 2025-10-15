@@ -12,10 +12,15 @@ export const strapiClient = axios.create({
 
 export async function getAllPosts() {
   try {
+    console.log('🔍 Fetching posts from:', strapiUrl);
+    console.log('🔑 Token available:', strapiToken ? `Yes (${strapiToken.substring(0, 20)}...)` : 'NO TOKEN!');
     const response = await strapiClient.get('/posts?populate=*&sort=publishedDate:desc');
+    console.log('✅ Posts fetched successfully:', response.data.data?.length || 0, 'posts');
     return response.data.data;
-  } catch (error) {
-    console.error('Error fetching posts:', error);
+  } catch (error: any) {
+    console.error('❌ Error fetching posts:', error.message);
+    console.error('❌ Status:', error.response?.status);
+    console.error('❌ Response:', error.response?.data);
     return [];
   }
 }
