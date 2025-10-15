@@ -161,8 +161,8 @@ def transform_post_content(content: str) -> tuple[str, Dict[str, int]]:
     return content, stats
 
 
-def fetch_all_posts() -> List[Dict]:
-    """Fetch all posts from Strapi."""
+def fetch_all_posts(slug_filter: Optional[str] = None) -> List[Dict]:
+    """Fetch all posts from Strapi, optionally filtered by slug pattern."""
     if not STRAPI_API_TOKEN:
         print("❌ Error: STRAPI_API_TOKEN not set in .env.server")
         sys.exit(1)
@@ -172,7 +172,11 @@ def fetch_all_posts() -> List[Dict]:
         'Content-Type': 'application/json'
     }
 
-    url = f'{STRAPI_URL}/api/posts?pagination[pageSize]=300'
+    # Use Strapi's filters for slug pattern
+    if slug_filter:
+        url = f'{STRAPI_URL}/api/posts?pagination[pageSize]=300&filters[slug][$startsWith]={slug_filter}'
+    else:
+        url = f'{STRAPI_URL}/api/posts?pagination[pageSize]=300'
 
     try:
         response = requests.get(url, headers=headers)
@@ -218,14 +222,24 @@ def main():
         print("🔍 DRY RUN MODE: No changes will be made")
         print("   Run with --execute to apply changes\n")
 
+    # Check for --filter flag
+    slug_filter = None
+    for i, arg in enumerate(sys.argv):
+        if arg == '--filter' and i + 1 < len(sys.argv):
+            slug_filter = sys.argv[i + 1]
+            break
+
     print("=" * 60)
     print("WordPress Shortcode Replacement")
     print("=" * 60)
-    print(f"Strapi URL: {STRAPI_URL}\n")
+    print(f"Strapi URL: {STRAPI_URL}")
+    if slug_filter:
+        print(f"Filter: slugs starting with '{slug_filter}'")
+    print()
 
     # Fetch all posts
     print("📥 Fetching posts from Strapi...")
-    posts = fetch_all_posts()
+    posts = fetch_all_posts(slug_filter)
     print(f"   Found {len(posts)} posts\n")
 
     # Track statistics
