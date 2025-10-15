@@ -8,6 +8,9 @@ export const revalidate = 300; // Revalidate every 5 minutes
 export default async function BlogPage() {
   const posts = await getAllPosts();
 
+  // Filter out posts without required attributes
+  const validPosts = posts.filter((post: any) => post?.attributes?.slug && post?.attributes?.title);
+
   return (
     <>
       <Header />
@@ -16,7 +19,7 @@ export default async function BlogPage() {
           <h1 className="text-4xl font-bold mb-12 text-center">BLOG</h1>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {posts.map((post: any) => (
+            {validPosts.map((post: any) => (
               <article key={post.id} className="border-b border-gray-200 pb-8">
                 {/* Featured image placeholder */}
                 <Link href={`/blog/${post.attributes.slug}`}>
