@@ -14,7 +14,8 @@ export async function getAllPosts() {
   try {
     console.log('🔍 Fetching posts from:', strapiUrl);
     console.log('🔑 Token available:', strapiToken ? `Yes (${strapiToken.substring(0, 20)}...)` : 'NO TOKEN!');
-    const response = await strapiClient.get('/posts?populate=*&sort=publishedDate:desc');
+    // Fetch with pagination to get all posts
+    const response = await strapiClient.get('/posts?populate=*&sort=publishedDate:desc&pagination[pageSize]=100');
     console.log('✅ Posts fetched successfully:', response.data.data?.length || 0, 'posts');
     return response.data.data;
   } catch (error: any) {
@@ -27,10 +28,15 @@ export async function getAllPosts() {
 
 export async function getPostBySlug(slug: string) {
   try {
+    console.log('🔍 Fetching post with slug:', slug);
     const response = await strapiClient.get(`/posts?filters[slug][$eq]=${slug}&populate=*`);
-    return response.data.data[0] || null;
-  } catch (error) {
-    console.error('Error fetching post:', error);
+    const post = response.data.data[0] || null;
+    console.log(post ? '✅ Post found' : '❌ Post not found for slug:', slug);
+    return post;
+  } catch (error: any) {
+    console.error('❌ Error fetching post by slug:', slug);
+    console.error('❌ Error message:', error.message);
+    console.error('❌ Status:', error.response?.status);
     return null;
   }
 }
