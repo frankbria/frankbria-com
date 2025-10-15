@@ -2367,6 +2367,13 @@ git commit -m "feat: add automated deployment script"
 - [ ] **Blog Post Images**: Add featured images to blog posts
 - [ ] **Footer Logos**: Add social media icons/logos
 - [ ] **Favicon**: Add site favicon
+- [ ] **WordPress Shortcode Cleanup**: Strip out WordPress shortcodes from blog post content
+  - [ ] Identify all types of shortcodes in use (e.g., `[podcast_subscribe]`, `[intense_tabs]`, `[youtube]`, etc.)
+  - [ ] Interactive review: Go through different shortcode types to determine replacement strategy
+  - [ ] Create content transformation script or manual cleanup process
+  - [ ] Replace shortcodes with proper HTML/React components where needed
+  - [ ] Remove obsolete/unsupported shortcodes
+  - [ ] Test blog posts after cleanup to ensure functionality preserved
 
 ### Testing & Validation ✅
 - [x] Automated content parity validation (100% pass)
