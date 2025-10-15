@@ -243,8 +243,11 @@ def main():
     print("🔄 Processing posts...")
     for i, post in enumerate(posts, 1):
         post_id = post['id']
-        title = post['attributes'].get('title', 'Untitled')
-        content = post['attributes'].get('content', '')
+
+        # Handle both Strapi 5 response formats (with or without attributes wrapper)
+        attrs = post.get('attributes', post)
+        title = attrs.get('title', 'Untitled')
+        content = attrs.get('content', '')
 
         # Transform content
         new_content, stats = transform_post_content(content)
