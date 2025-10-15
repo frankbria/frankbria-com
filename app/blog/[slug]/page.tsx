@@ -10,9 +10,11 @@ export const revalidate = 3600; // Revalidate every hour (fallback)
 export async function generateStaticParams() {
   const posts = await getAllPosts();
 
-  return posts.map((post: any) => ({
-    slug: post.attributes.slug,
-  }));
+  return posts
+    .filter((post: any) => post?.attributes?.slug)
+    .map((post: any) => ({
+      slug: post.attributes.slug,
+    }));
 }
 
 export default async function BlogPost({ params }: { params: Promise<{ slug: string }> }) {
