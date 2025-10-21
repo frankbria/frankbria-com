@@ -14,9 +14,12 @@ export default async function BlogPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen">
+      <main className="min-h-screen bg-gray-50">
         <div className="max-w-6xl mx-auto px-4 py-12">
-          <h1 className="text-4xl font-bold mb-12 text-center">BLOG</h1>
+          <div className="text-center mb-16">
+            <h1 className="text-5xl font-bold mb-4 text-gray-900">Blog</h1>
+            <p className="text-xl text-gray-600">Insights on scaling your business to 7 figures and beyond</p>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {validPosts.map((post: any) => {
@@ -26,9 +29,9 @@ export default async function BlogPage() {
                 : null;
 
               return (
-                <article key={post.id} className="border-b border-gray-200 pb-8">
+                <article key={post.id} className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
                   {/* Featured image */}
-                  <Link href={`/blog/${post.slug}`}>
+                  <Link href={`/blog/${post.slug}`} className="block">
                     {featuredImageUrl ? (
                       <div className="w-full h-48 overflow-hidden rounded mb-4 bg-gray-100">
                         <img
@@ -49,6 +52,29 @@ export default async function BlogPage() {
                     )}
                   </Link>
 
+                  {/* Post content */}
+                  <div className="p-6">
+                    {/* Post metadata */}
+                    <div className="flex items-center gap-3 mb-3 text-sm text-gray-500">
+                    {post.publishedDate && (
+                      <time dateTime={post.publishedDate}>
+                        {new Date(post.publishedDate).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </time>
+                    )}
+                    {post.categories && post.categories.length > 0 && (
+                      <>
+                        <span>•</span>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {post.categories[0].name}
+                        </span>
+                      </>
+                    )}
+                  </div>
+
                   <h2 className="text-2xl font-semibold mb-3">
                     <Link href={`/blog/${post.slug}`} className="text-gray-900 hover:text-blue-600 transition-colors">
                       {post.title}
@@ -56,8 +82,20 @@ export default async function BlogPage() {
                   </h2>
 
                   {post.excerpt && (
-                    <p className="text-gray-700 mb-3 leading-relaxed">{post.excerpt}</p>
+                    <p className="text-gray-600 mb-4 leading-relaxed line-clamp-3">{post.excerpt}</p>
                   )}
+
+                  {/* Read more link */}
+                  <Link
+                    href={`/blog/${post.slug}`}
+                    className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm group"
+                  >
+                    Read More
+                    <svg className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                  </div>
                 </article>
               );
             })}
