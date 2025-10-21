@@ -1,26 +1,38 @@
 import axios from 'axios';
 
-const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || process.env.STRAPI_URL || 'http://localhost:1337';
-const strapiToken = process.env.STRAPI_API_TOKEN || '';
+// Create client lazily to ensure environment variables are loaded
+function getStrapiClient() {
+  const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || process.env.STRAPI_URL || 'http://localhost:1337';
+  const strapiToken = process.env.STRAPI_API_TOKEN || '';
 
-console.log('Strapi Client Config:', {
-  url: strapiUrl,
-  hasToken: !!strapiToken,
-  tokenLength: strapiToken.length,
-  tokenPreview: strapiToken ? strapiToken.substring(0, 20) + '...' : 'NO TOKEN'
-});
+  console.log('Creating Strapi Client:', {
+    url: strapiUrl,
+    hasToken: !!strapiToken,
+    tokenLength: strapiToken.length,
+    tokenPreview: strapiToken ? strapiToken.substring(0, 20) + '...' : 'NO TOKEN',
+    envVars: {
+      NEXT_PUBLIC_STRAPI_URL: process.env.NEXT_PUBLIC_STRAPI_URL,
+      STRAPI_URL: process.env.STRAPI_URL,
+      hasSTRAPI_API_TOKEN: !!process.env.STRAPI_API_TOKEN
+    }
+  });
 
-export const strapiClient = axios.create({
-  baseURL: `${strapiUrl}/api`,
-  headers: {
-    'Authorization': `Bearer ${strapiToken}`,
-  },
-});
+  return axios.create({
+    baseURL: `${strapiUrl}/api`,
+    headers: {
+      'Authorization': `Bearer ${strapiToken}`,
+    },
+  });
+}
+
+// Legacy export for compatibility
+export const strapiClient = getStrapiClient();
 
 export async function getAllPosts() {
   try {
-    // Fetch with pagination to get all posts (default page size is 25)
-    const response = await strapiClient.get('/posts?populate=*&sort=publishedDate:desc&pagination[pageSize]=100');
+    // Create a fresh client for this request
+    const client = getStrapiClient();
+    const response = await client.get('/posts?populate=*&sort=publishedDate:desc&pagination[pageSize]=100');
     return response.data.data;
   } catch (error: any) {
     console.error('Error fetching posts:', error.message);
