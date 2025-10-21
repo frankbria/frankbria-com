@@ -5,18 +5,6 @@ function getStrapiClient() {
   const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || process.env.STRAPI_URL || 'http://localhost:1337';
   const strapiToken = process.env.STRAPI_API_TOKEN || '';
 
-  console.log('Creating Strapi Client:', {
-    url: strapiUrl,
-    hasToken: !!strapiToken,
-    tokenLength: strapiToken.length,
-    tokenPreview: strapiToken ? strapiToken.substring(0, 20) + '...' : 'NO TOKEN',
-    envVars: {
-      NEXT_PUBLIC_STRAPI_URL: process.env.NEXT_PUBLIC_STRAPI_URL,
-      STRAPI_URL: process.env.STRAPI_URL,
-      hasSTRAPI_API_TOKEN: !!process.env.STRAPI_API_TOKEN
-    }
-  });
-
   return axios.create({
     baseURL: `${strapiUrl}/api`,
     headers: {
