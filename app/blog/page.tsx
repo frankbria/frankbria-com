@@ -8,8 +8,13 @@ export const revalidate = 300; // Revalidate every 5 minutes
 export default async function BlogPage() {
   const posts = await getAllPosts();
 
+  console.log('Blog page - Total posts fetched:', posts.length);
+  console.log('Blog page - First post structure:', posts[0]);
+
   // Filter out posts without required attributes
   const validPosts = posts.filter((post: any) => post?.attributes?.slug && post?.attributes?.title);
+
+  console.log('Blog page - Valid posts after filter:', validPosts.length);
 
   return (
     <>
