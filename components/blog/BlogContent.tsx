@@ -33,6 +33,10 @@ export const BlogContent: FC<BlogContentProps> = ({ content }) => {
     content = content.replace(/\[intense_tab title="([^"]+)"\]/g, '{{tab:$1}}');
     content = content.replace(/\[\/intense_tab\]/g, '{{/tab}}');
 
+    // Remove clickable links from images (they often point to wrong images from WP migration)
+    // Match: <a href="..."><img .../></a> -> <img .../>
+    content = content.replace(/<a\s+[^>]*href="[^"]*"[^>]*>(\s*<img[^>]*>)\s*<\/a>/gi, '$1');
+
     // Parse podcast subscribe markers: {{podcast-subscribe:SHOW_ID}}
     content = content.replace(
       /\{\{podcast-subscribe:([^}]+)\}\}/g,
