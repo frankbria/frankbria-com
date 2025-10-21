@@ -12,6 +12,27 @@ interface BlogContentProps {
 
 export const BlogContent: FC<BlogContentProps> = ({ content }) => {
   const renderedContent = useMemo(() => {
+    // Convert WordPress podcast_subscribe shortcode to our format
+    // [podcast_subscribe id="2664"] -> {{podcast-subscribe:2664}}
+    content = content.replace(
+      /\[podcast_subscribe id="([^"]+)"\]/g,
+      '{{podcast-subscribe:$1}}'
+    );
+
+    // Convert WordPress/Gutenberg YouTube embeds to our format
+    // Extract YouTube ID from various formats
+    content = content.replace(
+      /https?:\/\/(?:www\.)?youtu(?:\.be|be\.com)\/(?:watch\?v=)?([a-zA-Z0-9_-]+)/g,
+      '{{youtube:$1}}'
+    );
+
+    // Convert WordPress intense_tabs shortcode to our format
+    // [intense_tabs] ... [intense_tab title="X"] content [/intense_tab] ... [/intense_tabs]
+    content = content.replace(/\[intense_tabs\]/g, '{{tabs-start}}');
+    content = content.replace(/\[\/intense_tabs\]/g, '{{/tabs}}');
+    content = content.replace(/\[intense_tab title="([^"]+)"\]/g, '{{tab:$1}}');
+    content = content.replace(/\[\/intense_tab\]/g, '{{/tab}}');
+
     // Parse podcast subscribe markers: {{podcast-subscribe:SHOW_ID}}
     content = content.replace(
       /\{\{podcast-subscribe:([^}]+)\}\}/g,

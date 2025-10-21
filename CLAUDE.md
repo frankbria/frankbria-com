@@ -1,0 +1,1 @@
+- The beta.frankbria.com testing server is available through SSH, username root keys onboard. The IP address is 47.88.89.175.

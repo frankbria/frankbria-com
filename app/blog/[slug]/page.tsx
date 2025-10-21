@@ -1,6 +1,6 @@
 import { getAllPosts, getPostBySlug } from '@/lib/strapi';
 import { notFound } from 'next/navigation';
-import PostContent from '@/components/PostContent';
+import { BlogContent } from '@/components/blog/BlogContent';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
@@ -36,7 +36,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
             <h1 className="text-4xl font-bold mb-6 text-gray-900">{attributes.title}</h1>
           </header>
 
-          <PostContent content={attributes.content} />
+          <BlogContent content={attributes.content} />
 
           {/* Share This Section */}
           <div className="mt-12 pt-8 border-t border-gray-200">
