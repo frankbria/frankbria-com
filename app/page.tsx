@@ -53,13 +53,15 @@ export default async function Home() {
             {/* High-Ticket Program */}
             <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
               <a href="https://htp.frankbria.com" target="_blank" rel="noopener noreferrer" className="block">
-                <img
-                  src="https://beta.frankbria.com/uploads/2019/05/HTP-Logo-bk-e1557603932149-400x133.png"
-                  alt="High-Ticket Program Logo"
-                  className="w-full h-auto rounded mb-4"
-                  width="400"
-                  height="133"
-                />
+                <div className="flex items-center justify-center mb-4" style={{ minHeight: '200px' }}>
+                  <img
+                    src="https://beta.frankbria.com/uploads/2019/05/HTP-Logo-bk-e1557603932149-400x133.png"
+                    alt="High-Ticket Program Logo"
+                    className="max-h-[200px] w-auto rounded"
+                    width="400"
+                    height="133"
+                  />
+                </div>
                 <h5 className="text-lg font-semibold text-gray-900">
                   Small B2B Services Businesses Looking to Grow to 7 Figures
                 </h5>
@@ -69,13 +71,15 @@ export default async function Home() {
             {/* Frank Bria Music */}
             <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
               <a href="https://frankbriamusic.com" target="_blank" rel="noopener noreferrer" className="block">
-                <img
-                  src="https://beta.frankbria.com/uploads/2020/05/FB_music_logo_1-400x124.png"
-                  alt="Frank Bria Music Logo"
-                  className="w-full h-auto rounded mb-4"
-                  width="400"
-                  height="124"
-                />
+                <div className="flex items-center justify-center mb-4" style={{ minHeight: '200px' }}>
+                  <img
+                    src="https://beta.frankbria.com/uploads/2020/05/FB_music_logo_1-400x124.png"
+                    alt="Frank Bria Music Logo"
+                    className="max-h-[200px] w-auto rounded"
+                    width="400"
+                    height="124"
+                  />
+                </div>
                 <h5 className="text-lg font-semibold text-gray-900">
                   Orchestral Film & Media Composer
                 </h5>
@@ -85,13 +89,15 @@ export default async function Home() {
             {/* 6 to 7 Figures Show Podcast */}
             <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
               <a href="https://frankbria.com/podcast" target="_blank" rel="noopener noreferrer" className="block">
-                <img
-                  src="https://beta.frankbria.com/uploads/2019/05/6_to_7_figures_cover_sq_300.jpg"
-                  alt="6 to 7 Figures Show Podcast Cover"
-                  className="w-full h-auto rounded mb-4"
-                  width="300"
-                  height="300"
-                />
+                <div className="flex items-center justify-center mb-4" style={{ minHeight: '200px' }}>
+                  <img
+                    src="https://beta.frankbria.com/uploads/2019/05/6_to_7_figures_cover_sq_300.jpg"
+                    alt="6 to 7 Figures Show Podcast Cover"
+                    className="max-h-[200px] w-auto rounded"
+                    width="300"
+                    height="300"
+                  />
+                </div>
                 <h5 className="text-lg font-semibold text-gray-900">
                   The 6 to 7 Figures Show Podcast
                 </h5>
@@ -101,13 +107,15 @@ export default async function Home() {
             {/* SaaS CX Show Podcast */}
             <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
               <a href="http://saascx.show" target="_blank" rel="noopener noreferrer" className="block">
-                <img
-                  src="https://beta.frankbria.com/uploads/2020/03/podcast_cover-400x284.jpg"
-                  alt="SaaS CX Show Podcast Cover"
-                  className="w-full h-auto rounded mb-4"
-                  width="400"
-                  height="284"
-                />
+                <div className="flex items-center justify-center mb-4" style={{ minHeight: '200px' }}>
+                  <img
+                    src="https://beta.frankbria.com/uploads/2020/03/podcast_cover-400x284.jpg"
+                    alt="SaaS CX Show Podcast Cover"
+                    className="max-h-[200px] w-auto rounded"
+                    width="400"
+                    height="284"
+                  />
+                </div>
                 <h5 className="text-lg font-semibold text-gray-900">
                   The SaaS CX Show Podcast
                 </h5>
@@ -117,13 +125,15 @@ export default async function Home() {
             {/* Scale Book */}
             <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
               <a href="https://www.amazon.com/Scale-Grow-Your-Business-Working-ebook/dp/B00YW8OIGS" target="_blank" rel="noopener noreferrer" className="block">
-                <img
-                  src="https://beta.frankbria.com/uploads/2020/03/3d_book_2_med.png"
-                  alt="Scale Book Cover"
-                  className="w-full h-auto rounded mb-4"
-                  width="400"
-                  height="534"
-                />
+                <div className="flex items-center justify-center mb-4" style={{ minHeight: '200px' }}>
+                  <img
+                    src="https://beta.frankbria.com/uploads/2020/03/3d_book_2_med.png"
+                    alt="Scale Book Cover"
+                    className="max-h-[200px] w-auto rounded"
+                    width="400"
+                    height="534"
+                  />
+                </div>
                 <h5 className="text-lg font-semibold text-gray-900">
                   Scale: How to Grow Your Business by Working Less
                 </h5>
@@ -133,13 +143,15 @@ export default async function Home() {
             {/* Seven Billion Banks Book */}
             <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
               <a href="https://www.amazon.com/Seven-Billion-Banks-Personalized-Experience/dp/0985725435" target="_blank" rel="noopener noreferrer" className="block">
-                <img
-                  src="https://beta.frankbria.com/uploads/2020/03/3d_book.png"
-                  alt="Seven Billion Banks Book Cover"
-                  className="w-full h-auto rounded mb-4"
-                  width="512"
-                  height="756"
-                />
+                <div className="flex items-center justify-center mb-4" style={{ minHeight: '200px' }}>
+                  <img
+                    src="https://beta.frankbria.com/uploads/2020/03/3d_book.png"
+                    alt="Seven Billion Banks Book Cover"
+                    className="max-h-[200px] w-auto rounded"
+                    width="512"
+                    height="756"
+                  />
+                </div>
                 <h5 className="text-lg font-semibold text-gray-900">
                   Seven Billion Banks: How a Personalized Banking Experience Will Save the Industry
                 </h5>
