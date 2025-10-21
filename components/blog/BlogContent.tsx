@@ -64,9 +64,13 @@ export const BlogContent: FC<BlogContentProps> = ({ content }) => {
       let tabMatch;
 
       while ((tabMatch = tabRegex.exec(tabsContent)) !== null) {
+        // Remove <a> tags from images in tab content too
+        let tabContent = tabMatch[2].trim();
+        tabContent = tabContent.replace(/<a\s+[^>]*href="[^"]*"[^>]*>(\s*<img[^>]*>)\s*<\/a>/gi, '$1');
+
         tabs.push({
           title: tabMatch[1],
-          content: tabMatch[2].trim()
+          content: tabContent
         });
       }
 
