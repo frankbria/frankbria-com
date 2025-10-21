@@ -1,7 +1,14 @@
 import axios from 'axios';
 
-const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
+const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || process.env.STRAPI_URL || 'http://localhost:1337';
 const strapiToken = process.env.STRAPI_API_TOKEN || '';
+
+console.log('Strapi Client Config:', {
+  url: strapiUrl,
+  hasToken: !!strapiToken,
+  tokenLength: strapiToken.length,
+  tokenPreview: strapiToken ? strapiToken.substring(0, 20) + '...' : 'NO TOKEN'
+});
 
 export const strapiClient = axios.create({
   baseURL: `${strapiUrl}/api`,
