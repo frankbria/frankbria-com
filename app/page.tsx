@@ -13,11 +13,11 @@ export default async function Home() {
 
           <div className="flex flex-col md:flex-row gap-8 mb-12">
             {/* Frank's Headshot */}
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 md:w-1/3">
               <img
                 src="https://beta.frankbria.com/uploads/2024/01/frank-bria-headshot-pro-400x516.png"
                 alt="Frank Bria"
-                className="w-48 h-auto rounded-lg"
+                className="w-full h-auto rounded-lg"
                 width="400"
                 height="516"
               />
