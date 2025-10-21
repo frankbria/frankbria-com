@@ -63,13 +63,13 @@ export const BlogContent: FC<BlogContentProps> = ({ content }) => {
 
   // Split content by component markers and render
   const renderContent = () => {
-    const parts: JSX.Element[] = [];
+    const parts: React.ReactElement[] = [];
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = renderedContent;
 
     let key = 0;
 
-    const processNode = (node: ChildNode): JSX.Element | string | null => {
+    const processNode = (node: ChildNode): React.ReactElement | string | null => {
       if (node.nodeType === Node.TEXT_NODE) {
         return node.textContent || '';
       }
@@ -140,7 +140,7 @@ export const BlogContent: FC<BlogContentProps> = ({ content }) => {
     Array.from(tempDiv.childNodes).forEach(node => {
       const processed = processNode(node);
       if (processed) {
-        parts.push(processed as JSX.Element);
+        parts.push(processed as React.ReactElement);
       }
     });
 
