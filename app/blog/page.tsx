@@ -1,15 +1,29 @@
-import { getAllPosts } from '@/lib/strapi';
+import { getPaginatedPosts } from '@/lib/strapi';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
-export default async function BlogPage() {
-  const posts = await getAllPosts();
+interface SearchParams {
+  page?: string;
+}
+
+interface BlogPageProps {
+  searchParams: Promise<SearchParams>;
+}
+
+export default async function BlogPage({ searchParams }: BlogPageProps) {
+  const params = await searchParams;
+  const currentPage = parseInt(params.page || '1', 10);
+  const pageSize = 12;
+
+  const { data: posts, meta } = await getPaginatedPosts(currentPage, pageSize);
 
   // Filter out posts without required fields - Strapi 5 returns flat structure
   const validPosts = posts.filter((post: any) => post?.slug && post?.title);
+
+  const { page, pageCount, total } = meta.pagination;
 
   return (
     <>
@@ -99,6 +113,87 @@ export default async function BlogPage() {
                 </article>
               );
             })}
+          </div>
+
+          {/* Pagination */}
+          {pageCount > 1 && (
+            <div className="mt-12 flex items-center justify-center gap-2">
+              {/* Previous button */}
+              {page > 1 ? (
+                <Link
+                  href={`/blog?page=${page - 1}`}
+                  className="px-4 py-2 rounded-lg bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors"
+                >
+                  Previous
+                </Link>
+              ) : (
+                <span className="px-4 py-2 rounded-lg bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed">
+                  Previous
+                </span>
+              )}
+
+              {/* Page numbers */}
+              <div className="flex gap-2">
+                {Array.from({ length: pageCount }, (_, i) => i + 1).map((pageNum) => {
+                  // Show first page, last page, current page, and pages around current
+                  const showPage =
+                    pageNum === 1 ||
+                    pageNum === pageCount ||
+                    Math.abs(pageNum - page) <= 1;
+
+                  const showEllipsisBefore = pageNum === page - 2 && page > 3;
+                  const showEllipsisAfter = pageNum === page + 2 && page < pageCount - 2;
+
+                  if (!showPage && !showEllipsisBefore && !showEllipsisAfter) {
+                    return null;
+                  }
+
+                  if (showEllipsisBefore || showEllipsisAfter) {
+                    return (
+                      <span key={pageNum} className="px-3 py-2 text-gray-500">
+                        ...
+                      </span>
+                    );
+                  }
+
+                  return pageNum === page ? (
+                    <span
+                      key={pageNum}
+                      className="px-4 py-2 rounded-lg bg-blue-600 text-white font-medium"
+                    >
+                      {pageNum}
+                    </span>
+                  ) : (
+                    <Link
+                      key={pageNum}
+                      href={`/blog?page=${pageNum}`}
+                      className="px-4 py-2 rounded-lg bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors"
+                    >
+                      {pageNum}
+                    </Link>
+                  );
+                })}
+              </div>
+
+              {/* Next button */}
+              {page < pageCount ? (
+                <Link
+                  href={`/blog?page=${page + 1}`}
+                  className="px-4 py-2 rounded-lg bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors"
+                >
+                  Next
+                </Link>
+              ) : (
+                <span className="px-4 py-2 rounded-lg bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed">
+                  Next
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Results info */}
+          <div className="mt-6 text-center text-sm text-gray-500">
+            Showing {((page - 1) * pageSize) + 1}-{Math.min(page * pageSize, total)} of {total} posts
           </div>
         </div>
       </main>

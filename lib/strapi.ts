@@ -28,6 +28,33 @@ export async function getAllPosts() {
   }
 }
 
+export async function getPaginatedPosts(page: number = 1, pageSize: number = 12) {
+  try {
+    const client = getStrapiClient();
+    const response = await client.get(
+      `/posts?populate=*&sort=publishedDate:desc&pagination[page]=${page}&pagination[pageSize]=${pageSize}`
+    );
+
+    return {
+      data: response.data.data,
+      meta: response.data.meta
+    };
+  } catch (error: any) {
+    console.error('Error fetching paginated posts:', error.message);
+    return {
+      data: [],
+      meta: {
+        pagination: {
+          page: 1,
+          pageSize: pageSize,
+          pageCount: 0,
+          total: 0
+        }
+      }
+    };
+  }
+}
+
 export async function getPostBySlug(slug: string) {
   try {
     const response = await strapiClient.get(`/posts?filters[slug][$eq]=${slug}&populate=*`);
