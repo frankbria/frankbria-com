@@ -29,21 +29,23 @@ You need to add the following secrets to your GitHub repository to enable automa
 ---
 
 ### 3. DEPLOY_SSH_KEY
-**Value**:
-```
------BEGIN OPENSSH PRIVATE KEY-----
-***REMOVED***
-***REMOVED***
-***REMOVED***
-***REMOVED***
-***REMOVED***
-***REMOVED***
------END OPENSSH PRIVATE KEY-----
-```
 
-**Description**: SSH private key for GitHub Actions authentication (already added to server)
+**⚠️ SECURITY**: Never commit private SSH keys to git!
 
-**⚠️ Important**: Copy the entire key including the header and footer lines
+**How to get this value**:
+
+1. Read the private key from your local machine:
+   ```bash
+   cat ~/.ssh/github-actions-dev-new
+   ```
+
+2. Copy the **entire output** including BEGIN and END lines
+
+3. Add it as a secret in GitHub (it will be encrypted)
+
+**Description**: SSH private key for GitHub Actions authentication
+
+**Note**: The corresponding public key has already been added to the server at `47.88.89.175`
 
 ---
 

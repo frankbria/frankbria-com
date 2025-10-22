@@ -55,18 +55,17 @@ Click **"Add secret"** for each:
 | `DEPLOY_SSH_KEY` | *See below* |
 
 **DEPLOY_SSH_KEY value**:
-```
------BEGIN OPENSSH PRIVATE KEY-----
-***REMOVED***
-***REMOVED***
-***REMOVED***
-***REMOVED***
-***REMOVED***
-***REMOVED***
------END OPENSSH PRIVATE KEY-----
+
+⚠️ **SECURITY**: Never commit private SSH keys to git!
+
+To get this value:
+```bash
+cat ~/.ssh/github-actions-dev-new
 ```
 
-⚠️ **Important**: Copy the entire key including BEGIN and END lines
+Copy the **entire output** including BEGIN and END lines, then add it as a secret in GitHub.
+
+**Note**: The corresponding public key (`ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAcHpHv0QyNv3NRUVxX4KIaA2gB5xklJ0eAF8j+sxAvi`) has already been added to the server.
 
 #### Add Environment Variables (📝 Plain text, not sensitive)
 

@@ -54,17 +54,15 @@ In the **development** environment you just created, add these **Secrets** (🔒
    ```
 
 3. **DEPLOY_SSH_KEY**
+
+   ⚠️ **Get the private key from your local machine**:
+   ```bash
+   cat ~/.ssh/github-actions-dev-new
    ```
-   -----BEGIN OPENSSH PRIVATE KEY-----
-   ***REMOVED***
-   ***REMOVED***
-   ***REMOVED***
-   ***REMOVED***
-   ***REMOVED***
-   ***REMOVED***
-   -----END OPENSSH PRIVATE KEY-----
-   ```
-   ⚠️ **Copy the entire key including BEGIN and END lines**
+
+   Copy the **entire output** (including BEGIN/END lines) and paste as the secret value.
+
+   **Note**: The public key is already on the server at 47.88.89.175
 
 ### **Step 3: Add Development Variables**
 
