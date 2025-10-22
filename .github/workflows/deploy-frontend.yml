@@ -35,6 +35,9 @@ jobs:
   deploy-frontend:
     name: Deploy to ${{ github.ref_name == 'main' && 'Production' || 'Development' }}
     runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.ref_name == 'main' && 'production' || 'development' }}
+      url: ${{ github.ref_name == 'main' && 'https://frankbria.com' || 'https://beta.frankbria.com' }}
 
     # Only run if not a draft PR
     if: github.event.pull_request.draft == false || github.event_name != 'pull_request'
@@ -59,35 +62,23 @@ jobs:
       - name: Build Next.js
         run: npm run build
         env:
-          NEXT_PUBLIC_STRAPI_URL: ${{ github.ref_name == 'main' && secrets.NEXT_PUBLIC_STRAPI_URL_PROD || secrets.NEXT_PUBLIC_STRAPI_URL || 'https://beta.frankbria.com' }}
+          NEXT_PUBLIC_STRAPI_URL: ${{ vars.STRAPI_URL || 'https://beta.frankbria.com' }}
 
       - name: Set deployment configuration
         id: deploy-config
         run: |
-          if [[ "${{ github.ref_name }}" == "main" ]]; then
-            # Production deployment (will be enabled later)
-            echo "host=${{ secrets.DEPLOY_HOST_PROD }}" >> $GITHUB_OUTPUT
-            echo "user=${{ secrets.DEPLOY_USER_PROD }}" >> $GITHUB_OUTPUT
-            echo "ssh_key=${{ secrets.DEPLOY_SSH_KEY_PROD }}" >> $GITHUB_OUTPUT
-            echo "path=/var/nodejs/frankbria-com" >> $GITHUB_OUTPUT
-            echo "pm2_name=frankbria-nextjs" >> $GITHUB_OUTPUT
-            echo "health_url=https://frankbria.com" >> $GITHUB_OUTPUT
-            echo "environment=production" >> $GITHUB_OUTPUT
-          else
-            # Development deployment
-            echo "host=${{ secrets.DEPLOY_HOST }}" >> $GITHUB_OUTPUT
-            echo "user=${{ secrets.DEPLOY_USER }}" >> $GITHUB_OUTPUT
-            echo "ssh_key=${{ secrets.DEPLOY_SSH_KEY }}" >> $GITHUB_OUTPUT
-            echo "path=${{ secrets.DEPLOY_FRONTEND_PATH }}" >> $GITHUB_OUTPUT
-            echo "pm2_name=frankbria-nextjs" >> $GITHUB_OUTPUT
-            echo "health_url=https://beta.frankbria.com" >> $GITHUB_OUTPUT
-            echo "environment=development" >> $GITHUB_OUTPUT
-          fi
+          # All configuration now comes from environment-specific secrets/vars
+          echo "host=${{ secrets.DEPLOY_HOST }}" >> $GITHUB_OUTPUT
+          echo "user=${{ secrets.DEPLOY_USER }}" >> $GITHUB_OUTPUT
+          echo "path=${{ vars.DEPLOY_PATH }}" >> $GITHUB_OUTPUT
+          echo "pm2_name=${{ vars.PM2_PROCESS_NAME || 'frankbria-nextjs' }}" >> $GITHUB_OUTPUT
+          echo "health_url=${{ vars.SITE_URL }}" >> $GITHUB_OUTPUT
+          echo "environment=${{ github.ref_name == 'main' && 'production' || 'development' }}" >> $GITHUB_OUTPUT
 
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ steps.deploy-config.outputs.ssh_key }}
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
 
       - name: Add server to known_hosts
         run: |
