@@ -17,10 +17,10 @@ on:
       environment:
         description: 'Deployment environment'
         required: true
-        default: 'development'
+        default: 'staging'
         type: choice
         options:
-          - development
+          - staging
           - production
 
 jobs:
@@ -28,7 +28,7 @@ jobs:
     name: Deploy Strapi to ${{ github.ref_name == 'main' && 'Production' || 'Development' }}
     runs-on: ubuntu-latest
     environment:
-      name: ${{ github.ref_name == 'main' && 'production' || 'development' }}
+      name: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
       url: ${{ github.ref_name == 'main' && 'https://frankbria.com' || 'https://beta.frankbria.com' }}
 
     steps:
@@ -43,7 +43,7 @@ jobs:
           echo "user=${{ secrets.DEPLOY_USER }}" >> $GITHUB_OUTPUT
           echo "path=${{ vars.STRAPI_DEPLOY_PATH || '/var/nodejs/frankbria-strapi' }}" >> $GITHUB_OUTPUT
           echo "pm2_name=${{ vars.STRAPI_PM2_NAME || 'strapi' }}" >> $GITHUB_OUTPUT
-          echo "environment=${{ github.ref_name == 'main' && 'production' || 'development' }}" >> $GITHUB_OUTPUT
+          echo "environment=${{ github.ref_name == 'main' && 'production' || 'staging' }}" >> $GITHUB_OUTPUT
 
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
