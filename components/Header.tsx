@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { SearchDialog } from './search/SearchDialog';
 
 export default function Header() {
   return (
@@ -23,6 +24,7 @@ export default function Header() {
             <Link href="/blog" className="text-gray-300 hover:text-white transition-colors">
               Blog
             </Link>
+            <SearchDialog />
           </nav>
         </div>
       </div>
