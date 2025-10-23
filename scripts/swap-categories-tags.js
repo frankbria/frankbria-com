@@ -34,20 +34,51 @@ const client = axios.create({
 
 async function fetchAllCategories() {
   console.log('📥 Fetching all categories...');
-  const response = await client.get('/categories?pagination[pageSize]=1000');
-  console.log(`✓ Found ${response.data.data.length} categories`);
-  return response.data.data;
+  let allCategories = [];
+  let page = 1;
+  let hasMore = true;
+
+  while (hasMore) {
+    const response = await client.get(`/categories?pagination[page]=${page}&pagination[pageSize]=100`);
+    allCategories = allCategories.concat(response.data.data);
+
+    const { pageCount } = response.data.meta.pagination;
+    hasMore = page < pageCount;
+    page++;
+  }
+
+  console.log(`✓ Found ${allCategories.length} categories`);
+  return allCategories;
 }
 
 async function fetchAllTags() {
   console.log('📥 Fetching all tags...');
-  const response = await client.get('/tags?pagination[pageSize]=1000');
-  console.log(`✓ Found ${response.data.data.length} tags`);
-  return response.data.data;
+  let allTags = [];
+  let page = 1;
+  let hasMore = true;
+
+  while (hasMore) {
+    const response = await client.get(`/tags?pagination[page]=${page}&pagination[pageSize]=100`);
+    allTags = allTags.concat(response.data.data);
+
+    const { pageCount } = response.data.meta.pagination;
+    hasMore = page < pageCount;
+    page++;
+  }
+
+  console.log(`✓ Found ${allTags.length} tags`);
+  return allTags;
 }
 
 async function createTag(tagData) {
   try {
+    // Check if tag already exists with this slug
+    const existing = await client.get(`/tags?filters[slug][$eq]=${tagData.slug}`);
+    if (existing.data.data.length > 0) {
+      console.log(`⚠️  Tag "${tagData.name}" already exists, using existing`);
+      return existing.data.data[0];
+    }
+
     const response = await client.post('/tags', {
       data: {
         name: tagData.name,
@@ -63,6 +94,13 @@ async function createTag(tagData) {
 
 async function createCategory(categoryData) {
   try {
+    // Check if category already exists with this slug
+    const existing = await client.get(`/categories?filters[slug][$eq]=${categoryData.slug}`);
+    if (existing.data.data.length > 0) {
+      console.log(`⚠️  Category "${categoryData.name}" already exists, using existing`);
+      return existing.data.data[0];
+    }
+
     const response = await client.post('/categories', {
       data: {
         name: categoryData.name,
@@ -94,9 +132,21 @@ async function deleteTag(id) {
 
 async function fetchAllPosts() {
   console.log('📥 Fetching all posts...');
-  const response = await client.get('/posts?pagination[pageSize]=1000&populate=categories,tags');
-  console.log(`✓ Found ${response.data.data.length} posts`);
-  return response.data.data;
+  let allPosts = [];
+  let page = 1;
+  let hasMore = true;
+
+  while (hasMore) {
+    const response = await client.get(`/posts?pagination[page]=${page}&pagination[pageSize]=100&populate[categories][fields][0]=id&populate[tags][fields][0]=id`);
+    allPosts = allPosts.concat(response.data.data);
+
+    const { pageCount } = response.data.meta.pagination;
+    hasMore = page < pageCount;
+    page++;
+  }
+
+  console.log(`✓ Found ${allPosts.length} posts`);
+  return allPosts;
 }
 
 async function updatePost(postId, categories, tags) {
@@ -138,9 +188,12 @@ async function main() {
     const cat = currentCategories[i];
     process.stdout.write(`\r   Progress: ${i + 1}/${currentCategories.length}`);
 
+    // Handle both Strapi 4 and Strapi 5 response formats
+    const catData = cat.attributes || cat;
+
     const newTag = await createTag({
-      name: cat.name,
-      slug: cat.slug
+      name: catData.name,
+      slug: catData.slug
     });
 
     if (newTag) {
@@ -157,9 +210,12 @@ async function main() {
     const tag = currentTags[i];
     process.stdout.write(`\r   Progress: ${i + 1}/${currentTags.length}`);
 
+    // Handle both Strapi 4 and Strapi 5 response formats
+    const tagData = tag.attributes || tag;
+
     const newCategory = await createCategory({
-      name: tag.name,
-      slug: tag.slug
+      name: tagData.name,
+      slug: tagData.slug
     });
 
     if (newCategory) {
@@ -176,13 +232,18 @@ async function main() {
     const post = posts[i];
     process.stdout.write(`\r   Progress: ${i + 1}/${posts.length}`);
 
+    // Handle both Strapi 4 and Strapi 5 response formats for populated fields
+    const postData = post.attributes || post;
+    const postCategories = Array.isArray(postData.categories?.data) ? postData.categories.data : (postData.categories || []);
+    const postTags = Array.isArray(postData.tags?.data) ? postData.tags.data : (postData.tags || []);
+
     // Old categories → new tags
-    const newTagIds = (post.categories || [])
+    const newTagIds = postCategories
       .map(cat => oldCategoryIdToNewTagId[cat.id])
       .filter(id => id !== undefined);
 
     // Old tags → new categories
-    const newCategoryIds = (post.tags || [])
+    const newCategoryIds = postTags
       .map(tag => oldTagIdToNewCategoryId[tag.id])
       .filter(id => id !== undefined);
 
