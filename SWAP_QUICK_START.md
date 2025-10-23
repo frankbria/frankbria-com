@@ -10,8 +10,12 @@
 ```bash
 ssh root@47.88.89.175
 cd /var/nodejs/frankbria-strapi
-cp .tmp/data.db .tmp/data.db.backup-$(date +%Y%m%d-%H%M%S)
-ls -lh .tmp/data.db.backup*  # Verify backup exists
+
+# Backup PostgreSQL database
+PGPASSWORD='$POSTGRES_PASSWORD' pg_dump -h localhost -U strapi_user -d frankbria_strapi > ~/strapi_backup_$(date +%Y%m%d-%H%M%S).sql
+
+# Verify backup exists
+ls -lh ~/strapi_backup*.sql
 ```
 
 ### 2. Get API Token
@@ -36,10 +40,16 @@ node scripts/swap-categories-tags.js
 ## Rollback (if needed)
 ```bash
 ssh root@47.88.89.175
-cd /var/nodejs/frankbria-strapi
+
+# Stop Strapi
 pm2 stop strapi
-cp .tmp/data.db.backup-YYYYMMDD-HHMMSS .tmp/data.db
+
+# Restore PostgreSQL database
+PGPASSWORD='$POSTGRES_PASSWORD' psql -h localhost -U strapi_user -d frankbria_strapi < ~/strapi_backup_YYYYMMDD-HHMMSS.sql
+
+# Restart Strapi
 pm2 restart strapi
+pm2 logs strapi --lines 50
 ```
 
 ## Full Documentation

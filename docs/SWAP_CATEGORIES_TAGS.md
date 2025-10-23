@@ -35,16 +35,18 @@ ssh root@47.88.89.175
 ```bash
 cd /var/nodejs/frankbria-strapi
 
-# Backup SQLite database (if using SQLite)
-cp .tmp/data.db .tmp/data.db.backup-$(date +%Y%m%d-%H%M%S)
-
-# OR backup PostgreSQL (if using PostgreSQL)
-# pg_dump strapi_db > strapi_db_backup_$(date +%Y%m%d-%H%M%S).sql
+# Backup PostgreSQL database
+PGPASSWORD='$POSTGRES_PASSWORD' pg_dump -h localhost -U strapi_user -d frankbria_strapi > ~/strapi_backup_$(date +%Y%m%d-%H%M%S).sql
 ```
 
 **Verify backup exists:**
 ```bash
-ls -lh .tmp/data.db.backup*
+ls -lh ~/strapi_backup*.sql
+```
+
+**Expected output:**
+```
+-rw-r--r-- 1 root root 15M Oct 22 14:30 strapi_backup_20251022-143000.sql
 ```
 
 ---
@@ -217,20 +219,21 @@ If something goes wrong:
 
 ```bash
 ssh root@47.88.89.175
-cd /var/nodejs/frankbria-strapi
 
 # Stop Strapi
 pm2 stop strapi
 
-# Restore backup
-cp .tmp/data.db.backup-YYYYMMDD-HHMMSS .tmp/data.db
+# Restore PostgreSQL backup (replace YYYYMMDD-HHMMSS with your backup timestamp)
+PGPASSWORD='$POSTGRES_PASSWORD' psql -h localhost -U strapi_user -d frankbria_strapi < ~/strapi_backup_YYYYMMDD-HHMMSS.sql
 
 # Restart Strapi
 pm2 restart strapi
 
 # Verify
-pm2 logs strapi
+pm2 logs strapi --lines 50
 ```
+
+**Note:** PostgreSQL restore will drop and recreate all tables, completely restoring to the backup state.
 
 ---
 
