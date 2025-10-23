@@ -49,7 +49,14 @@ interface RelatedPostsProps {
  * ```
  */
 export function RelatedPosts({ posts }: RelatedPostsProps) {
-  if (posts.length === 0) {
+  if (!posts || posts.length === 0) {
+    return null;
+  }
+
+  // Filter out any invalid posts (missing attributes)
+  const validPosts = posts.filter(post => post && post.attributes);
+
+  if (validPosts.length === 0) {
     return null;
   }
 
@@ -57,7 +64,7 @@ export function RelatedPosts({ posts }: RelatedPostsProps) {
     <div className="mt-16 pt-8 border-t border-gray-200">
       <h3 className="text-2xl font-bold mb-6 text-gray-900 italic">Related</h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {posts.map((post) => {
+        {validPosts.map((post) => {
           const { attributes } = post;
           const imageUrl = attributes.featuredImage?.url || '/placeholder-image.jpg';
 
