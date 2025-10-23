@@ -82,9 +82,12 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                     {post.categories && post.categories.length > 0 && (
                       <>
                         <span>•</span>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <Link
+                          href={`/category/${post.categories[0].slug}`}
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
+                        >
                           {post.categories[0].name}
-                        </span>
+                        </Link>
                       </>
                     )}
                   </div>

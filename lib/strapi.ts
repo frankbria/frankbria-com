@@ -113,3 +113,75 @@ export async function getPageBySlug(slug: string) {
     return null;
   }
 }
+
+// Category API Functions
+
+export async function getAllCategories() {
+  try {
+    const client = getStrapiClient();
+    const response = await client.get('/categories?populate=*&sort=name:asc');
+    return response.data.data;
+  } catch (error: any) {
+    console.error('Error fetching categories:', error.message);
+    return [];
+  }
+}
+
+export async function getCategoryBySlug(slug: string) {
+  try {
+    const client = getStrapiClient();
+    const response = await client.get(`/categories?filters[slug][$eq]=${slug}&populate=*`);
+    const rawCategory = response.data.data[0] || null;
+
+    if (!rawCategory) {
+      return null;
+    }
+
+    // Normalize to consistent format (handle both flat and attributes structure)
+    const category = rawCategory.attributes ? rawCategory : {
+      id: rawCategory.id,
+      documentId: rawCategory.documentId,
+      attributes: {
+        name: rawCategory.name,
+        slug: rawCategory.slug,
+        description: rawCategory.description || '',
+      }
+    };
+
+    return category;
+  } catch (error: any) {
+    console.error('Error fetching category by slug:', slug, error.message);
+    return null;
+  }
+}
+
+export async function getPostsByCategory(
+  categorySlug: string,
+  page: number = 1,
+  pageSize: number = 12
+) {
+  try {
+    const client = getStrapiClient();
+    const response = await client.get(
+      `/posts?filters[categories][slug][$eq]=${categorySlug}&populate=*&sort=publishedDate:desc&pagination[page]=${page}&pagination[pageSize]=${pageSize}`
+    );
+
+    return {
+      data: response.data.data,
+      meta: response.data.meta
+    };
+  } catch (error: any) {
+    console.error('Error fetching posts for category:', categorySlug, error.message);
+    return {
+      data: [],
+      meta: {
+        pagination: {
+          page: 1,
+          pageSize: pageSize,
+          pageCount: 0,
+          total: 0
+        }
+      }
+    };
+  }
+}

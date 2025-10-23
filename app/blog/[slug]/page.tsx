@@ -34,6 +34,24 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
         <article className="max-w-4xl mx-auto px-4 py-12">
           <header className="mb-12">
             <h1 className="text-4xl font-bold mb-6 text-gray-900">{attributes.title}</h1>
+
+            {/* Category Links */}
+            {attributes.categories && attributes.categories.length > 0 && (
+              <div className="flex items-center gap-2 mb-6">
+                <span className="text-gray-600">Categories:</span>
+                <div className="flex flex-wrap gap-2">
+                  {attributes.categories.map((category: any) => (
+                    <Link
+                      key={category.id}
+                      href={`/category/${category.slug}`}
+                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
+                    >
+                      {category.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </header>
 
           <BlogContent content={attributes.content} />
