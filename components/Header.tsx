@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { SearchDialog } from './search/SearchDialog';
+import { MobileMenu } from './mobile/MobileMenu';
 
 export default function Header() {
   return (
@@ -17,7 +18,8 @@ export default function Header() {
             />
           </Link>
 
-          <nav className="flex gap-6 items-center">
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex gap-6 items-center">
             <Link href="/" className="text-gray-300 hover:text-white transition-colors">
               Home
             </Link>
@@ -26,6 +28,12 @@ export default function Header() {
             </Link>
             <SearchDialog />
           </nav>
+
+          {/* Mobile Navigation */}
+          <div className="flex md:hidden items-center gap-2">
+            <SearchDialog />
+            <MobileMenu />
+          </div>
         </div>
       </div>
     </header>
