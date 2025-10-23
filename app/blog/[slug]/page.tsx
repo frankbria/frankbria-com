@@ -1,6 +1,7 @@
-import { getAllPosts, getPostBySlug } from '@/lib/strapi';
+import { getAllPosts, getPostBySlug, getRelatedPosts } from '@/lib/strapi';
 import { notFound } from 'next/navigation';
 import { BlogContent } from '@/components/blog/BlogContent';
+import { RelatedPosts } from '@/components/RelatedPosts';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
@@ -26,6 +27,10 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
   }
 
   const { attributes } = post;
+
+  // Get related posts based on categories
+  const categoryIds = attributes.categories?.map((cat: any) => cat.id) || [];
+  const relatedPosts = await getRelatedPosts(post.id, categoryIds, 3);
 
   return (
     <>
@@ -95,6 +100,9 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
               </a>
             </div>
           </div>
+
+          {/* Related Posts Section */}
+          <RelatedPosts posts={relatedPosts} />
         </article>
       </main>
       <Footer />

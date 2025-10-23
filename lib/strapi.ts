@@ -185,3 +185,58 @@ export async function getPostsByCategory(
     };
   }
 }
+
+/**
+ * Fetches related posts based on shared categories
+ *
+ * @param postId - The ID of the current post to exclude from results
+ * @param categoryIds - Array of category IDs to match against
+ * @param limit - Maximum number of posts to return (default: 3)
+ * @returns Array of related posts, or empty array on error
+ *
+ * @example
+ * // Get 3 related posts from same categories
+ * const related = await getRelatedPosts(1, [2, 3], 3);
+ *
+ * @example
+ * // Fallback to recent posts when no categories
+ * const recent = await getRelatedPosts(1, [], 3);
+ */
+export async function getRelatedPosts(
+  postId: number,
+  categoryIds: number[],
+  limit: number = 3
+): Promise<any[]> {
+  try {
+    const client = getStrapiClient();
+
+    if (categoryIds.length === 0) {
+      // Fallback: get recent posts when no categories provided
+      const response = await client.get('/posts', {
+        params: {
+          'filters[id][$ne]': postId,
+          'populate': '*',
+          'pagination[pageSize]': limit,
+          'sort': 'publishedDate:desc',
+        },
+      });
+      return response.data.data || [];
+    }
+
+    // Get posts with matching categories, excluding current post
+    const response = await client.get('/posts', {
+      params: {
+        'filters[categories][id][$in]': categoryIds,
+        'filters[id][$ne]': postId,
+        'populate': '*',
+        'pagination[pageSize]': limit,
+        'sort': 'publishedDate:desc',
+      },
+    });
+
+    return response.data.data || [];
+  } catch (error) {
+    console.error('Error fetching related posts:', error);
+    return [];
+  }
+}
