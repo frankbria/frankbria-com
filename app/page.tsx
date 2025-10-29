@@ -73,7 +73,7 @@ export default async function Home() {
               <a href="https://frankbriamusic.com" target="_blank" rel="noopener noreferrer" className="block">
                 <div className="flex items-center justify-center mb-4" style={{ minHeight: '200px' }}>
                   <img
-                    src="https://beta.frankbria.com/uploads/2020/05/FB_music_logo_1-400x124.png"
+                    src="/FB_music_logo_v2_trans_dark_4x.png"
                     alt="Frank Bria Music Logo"
                     className="max-h-[200px] w-auto rounded"
                     width="400"
