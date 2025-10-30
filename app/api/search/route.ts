@@ -22,7 +22,7 @@ interface SearchResponse {
 
 /**
  * Builds a Strapi query string for searching posts
- * Searches in both title and content fields using case-insensitive matching
+ * Searches in title, content, and excerpt fields using case-insensitive matching
  */
 function buildSearchQuery(query: string, page: number): string {
   const encodedQuery = encodeURIComponent(query);
@@ -30,6 +30,7 @@ function buildSearchQuery(query: string, page: number): string {
   return `/posts?` +
     `filters[$or][0][title][$containsi]=${encodedQuery}&` +
     `filters[$or][1][content][$containsi]=${encodedQuery}&` +
+    `filters[$or][2][excerpt][$containsi]=${encodedQuery}&` +
     `populate=*&` +
     `sort=publishedDate:desc&` +
     `pagination[page]=${page}&` +
@@ -85,20 +86,43 @@ export async function GET(request: NextRequest) {
 
     // Execute search query
     const strapiQuery = buildSearchQuery(query, page);
+    console.log(`Executing search query: ${strapiQuery}`);
+
     const response = await strapiClient.get(strapiQuery);
 
     // Validate response structure
     if (!response.data || typeof response.data !== 'object') {
+      console.error('Invalid response structure from Strapi:', response.data);
       throw new Error('Invalid response from Strapi');
+    }
+
+    // Strapi 5 returns flat structure for filtered queries
+    // Ensure data is in the expected format for the frontend
+    const posts = response.data.data || [];
+
+    // Log search results for debugging
+    console.log(`Search query: "${query}" returned ${posts.length} results`);
+    if (posts.length > 0) {
+      console.log('Sample result:', {
+        title: posts[0].title,
+        slug: posts[0].slug,
+        hasExcerpt: !!posts[0].excerpt,
+        hasContent: !!posts[0].content
+      });
     }
 
     // Return formatted response
     return NextResponse.json({
-      data: response.data.data || [],
+      data: posts,
       meta: response.data.meta || createEmptyResponse().meta,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Search API error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status
+    });
     return NextResponse.json(
       { error: 'Failed to search posts' },
       { status: 500 }
