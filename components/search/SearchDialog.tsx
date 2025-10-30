@@ -45,7 +45,10 @@ function useSearch() {
         } else {
           const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
           console.error('Search API error:', response.status, errorData);
-          setError(`Search failed: ${errorData.error || response.statusText}`);
+          const errorMessage = typeof errorData === 'string'
+            ? errorData
+            : errorData.error || errorData.message || response.statusText;
+          setError(`Search failed (${response.status}): ${errorMessage}`);
           setResults([]);
         }
       } catch (error) {
