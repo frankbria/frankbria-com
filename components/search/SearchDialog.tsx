@@ -29,8 +29,22 @@ function useSearch() {
       setLoading(true);
       setError(null);
       try {
-        const url = `/api-next/search?q=${encodeURIComponent(query)}&page=${SEARCH_PAGE}`;
-        console.log('Fetching:', url);
+        // Query Strapi directly - it's proxied through nginx at /api/*
+        const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || '';
+        const searchQuery = encodeURIComponent(query);
+
+        // Build Strapi search query
+        const url = `${strapiUrl}/api/posts?` +
+          `filters[$or][0][title][$containsi]=${searchQuery}&` +
+          `filters[$or][1][content][$containsi]=${searchQuery}&` +
+          `filters[$or][2][excerpt][$containsi]=${searchQuery}&` +
+          `populate[categories][fields][0]=name&` +
+          `populate[categories][fields][1]=slug&` +
+          `sort[0]=publishedDate:desc&` +
+          `pagination[page]=${SEARCH_PAGE}&` +
+          `pagination[pageSize]=12`;
+
+        console.log('Searching Strapi:', url);
         const response = await fetch(url);
 
         console.log('Response status:', response.status);
@@ -38,9 +52,13 @@ function useSearch() {
         if (response.ok) {
           const data = await response.json();
           console.log('Search results:', data);
-          setResults(data.data || []);
-          if (!data.data || data.data.length === 0) {
+          const posts = data.data || [];
+          setResults(posts);
+
+          if (posts.length === 0) {
             console.log('No results found for:', query);
+          } else {
+            console.log(`Found ${posts.length} results`);
           }
         } else {
           const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
