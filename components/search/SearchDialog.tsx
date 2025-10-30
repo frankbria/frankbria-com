@@ -29,7 +29,7 @@ function useSearch() {
       setLoading(true);
       setError(null);
       try {
-        const url = `/api/search?q=${encodeURIComponent(query)}&page=${SEARCH_PAGE}`;
+        const url = `/api-next/search?q=${encodeURIComponent(query)}&page=${SEARCH_PAGE}`;
         console.log('Fetching:', url);
         const response = await fetch(url);
 
