@@ -16,27 +16,41 @@ function useSearch() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!query.trim()) {
       setResults([]);
+      setError(null);
       return;
     }
 
     const timeoutId = setTimeout(async () => {
       setLoading(true);
+      setError(null);
       try {
         const url = `/api/search?q=${encodeURIComponent(query)}&page=${SEARCH_PAGE}`;
+        console.log('Fetching:', url);
         const response = await fetch(url);
+
+        console.log('Response status:', response.status);
 
         if (response.ok) {
           const data = await response.json();
+          console.log('Search results:', data);
           setResults(data.data || []);
+          if (!data.data || data.data.length === 0) {
+            console.log('No results found for:', query);
+          }
         } else {
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+          console.error('Search API error:', response.status, errorData);
+          setError(`Search failed: ${errorData.error || response.statusText}`);
           setResults([]);
         }
       } catch (error) {
         console.error('Search error:', error);
+        setError('Failed to connect to search service');
         setResults([]);
       } finally {
         setLoading(false);
@@ -49,6 +63,7 @@ function useSearch() {
   const clearSearch = useCallback(() => {
     setQuery('');
     setResults([]);
+    setError(null);
   }, []);
 
   return {
@@ -56,6 +71,7 @@ function useSearch() {
     setQuery,
     results,
     loading,
+    error,
     clearSearch,
   };
 }
@@ -96,7 +112,7 @@ function getKeyboardShortcutLabel(): string {
  */
 export function SearchDialog() {
   const [isOpen, setIsOpen] = useState(false);
-  const { query, setQuery, results, loading, clearSearch } = useSearch();
+  const { query, setQuery, results, loading, error, clearSearch } = useSearch();
 
   // Open dialog with keyboard shortcut
   const openDialog = useCallback(() => setIsOpen(true), []);
@@ -155,6 +171,12 @@ export function SearchDialog() {
               autoFocus
               className="mb-4"
             />
+
+            {error && (
+              <div className="p-4 mb-4 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+                {error}
+              </div>
+            )}
 
             <SearchResults
               results={results}

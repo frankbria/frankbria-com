@@ -23,16 +23,21 @@ interface SearchResponse {
 /**
  * Builds a Strapi query string for searching posts
  * Searches in title, content, and excerpt fields using case-insensitive matching
+ *
+ * Note: Strapi 5 uses a different syntax for $or filters
+ * https://docs.strapi.io/dev-docs/api/rest/filters-locale-publication#or
  */
 function buildSearchQuery(query: string, page: number): string {
   const encodedQuery = encodeURIComponent(query);
 
+  // Try Strapi 5 proper $or syntax with URL parameter arrays
   return `/posts?` +
     `filters[$or][0][title][$containsi]=${encodedQuery}&` +
     `filters[$or][1][content][$containsi]=${encodedQuery}&` +
     `filters[$or][2][excerpt][$containsi]=${encodedQuery}&` +
-    `populate=*&` +
-    `sort=publishedDate:desc&` +
+    `populate[categories][fields][0]=name&` +
+    `populate[categories][fields][1]=slug&` +
+    `sort[0]=publishedDate:desc&` +
     `pagination[page]=${page}&` +
     `pagination[pageSize]=${PAGE_SIZE}`;
 }
