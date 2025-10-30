@@ -39,7 +39,7 @@ export default function Footer() {
               for more information.
             </p>
             <p>
-              © 2019 Noatak Enterprises, LLC, dba High-Ticket Program | All rights reserved |{' '}
+              © 2025 Noatak Enterprises, LLC, dba High-Ticket Program and Bria Strategy Group | All rights reserved |{' '}
               <Link href="/terms" className="text-gray-300 hover:text-white underline">
                 Terms and Conditions
               </Link>{' '}

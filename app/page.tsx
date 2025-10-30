@@ -52,7 +52,7 @@ export default async function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
             {/* High-Ticket Program */}
             <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
-              <a href="https://htp.frankbria.com" target="_blank" rel="noopener noreferrer" className="block">
+              <a href="/category/think-tank" className="block">
                 <div className="flex items-center justify-center mb-4" style={{ minHeight: '200px' }}>
                   <img
                     src="https://beta.frankbria.com/uploads/2019/05/HTP-Logo-bk-e1557603932149-400x133.png"
@@ -82,42 +82,6 @@ export default async function Home() {
                 </div>
                 <h5 className="text-lg font-semibold text-gray-900">
                   Orchestral Film & Media Composer
-                </h5>
-              </a>
-            </div>
-
-            {/* 6 to 7 Figures Show Podcast */}
-            <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
-              <a href="https://frankbria.com/podcast" target="_blank" rel="noopener noreferrer" className="block">
-                <div className="flex items-center justify-center mb-4" style={{ minHeight: '200px' }}>
-                  <img
-                    src="https://beta.frankbria.com/uploads/2019/05/6_to_7_figures_cover_sq_300.jpg"
-                    alt="6 to 7 Figures Show Podcast Cover"
-                    className="max-h-[200px] w-auto rounded"
-                    width="300"
-                    height="300"
-                  />
-                </div>
-                <h5 className="text-lg font-semibold text-gray-900">
-                  The 6 to 7 Figures Show Podcast
-                </h5>
-              </a>
-            </div>
-
-            {/* SaaS CX Show Podcast */}
-            <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
-              <a href="http://saascx.show" target="_blank" rel="noopener noreferrer" className="block">
-                <div className="flex items-center justify-center mb-4" style={{ minHeight: '200px' }}>
-                  <img
-                    src="https://beta.frankbria.com/uploads/2020/03/podcast_cover-400x284.jpg"
-                    alt="SaaS CX Show Podcast Cover"
-                    className="max-h-[200px] w-auto rounded"
-                    width="400"
-                    height="284"
-                  />
-                </div>
-                <h5 className="text-lg font-semibold text-gray-900">
-                  The SaaS CX Show Podcast
                 </h5>
               </a>
             </div>
@@ -156,6 +120,26 @@ export default async function Home() {
                   Seven Billion Banks: How a Personalized Banking Experience Will Save the Industry
                 </h5>
               </a>
+            </div>
+
+            {/* 6 to 7 Figures Show Podcast - Centered in row */}
+            <div className="md:col-span-2 flex justify-center">
+              <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow md:w-1/2">
+                <a href="https://open.spotify.com/show/0xcYcgrzcnsff0mkNX0fGh" target="_blank" rel="noopener noreferrer" className="block">
+                  <div className="flex items-center justify-center mb-4" style={{ minHeight: '200px' }}>
+                    <img
+                      src="https://beta.frankbria.com/uploads/2019/05/6_to_7_figures_cover_sq_300.jpg"
+                      alt="6 to 7 Figures Show Podcast Cover"
+                      className="max-h-[200px] w-auto rounded"
+                      width="300"
+                      height="300"
+                    />
+                  </div>
+                  <h5 className="text-lg font-semibold text-gray-900">
+                    The 6 to 7 Figures Show Podcast
+                  </h5>
+                </a>
+              </div>
             </div>
           </div>
         </article>
