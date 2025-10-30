@@ -5,6 +5,8 @@ import { strapiClient } from '@/lib/strapi';
 const PAGE_SIZE = 12;
 const DEFAULT_PAGE = 1;
 
+// Force rebuild timestamp: 2025-10-29T22:30:00Z
+
 // Types
 interface PaginationMeta {
   page: number;
