@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { SearchDialog } from './search/SearchDialog';
+// import { SearchDialog } from './search/SearchDialog'; // Disabled until Strapi permissions configured
 import { MobileMenu } from './mobile/MobileMenu';
 
 export default function Header() {
@@ -26,12 +26,12 @@ export default function Header() {
             <Link href="/blog" className="text-gray-300 hover:text-white transition-colors">
               Blog
             </Link>
-            <SearchDialog />
+            {/* <SearchDialog /> */}
           </nav>
 
           {/* Mobile Navigation */}
           <div className="flex md:hidden items-center gap-2">
-            <SearchDialog />
+            {/* <SearchDialog /> */}
             <MobileMenu />
           </div>
         </div>
