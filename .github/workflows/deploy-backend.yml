@@ -1,18 +1,19 @@
 name: Deploy Backend (Strapi)
 
-on:
-  push:
-    branches:
-      # - main         # Production - DISABLED until MVP approved
-      - develop      # Development
-    paths:
-      - 'strapi/**'
-      - 'config/**'
-      - 'src/**'
-      - 'database/**'
-      - '.github/workflows/deploy-backend.yml'
+# Strapi is a headless CMS - code rarely changes
+# This workflow is DISABLED by default and only runs via manual trigger
+# Use this for:
+# - Strapi version upgrades
+# - Custom plugin installations
+# - Configuration file changes (if tracked in git)
 
-  workflow_dispatch:  # Manual trigger
+on:
+  # push:
+  #   branches:
+  #     - main         # DISABLED - Strapi code managed manually
+  #     - develop      # DISABLED - Strapi code managed manually
+
+  workflow_dispatch:  # Manual trigger ONLY
     inputs:
       environment:
         description: 'Deployment environment'
