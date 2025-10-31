@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
-      url: ${{ github.ref_name == 'main' && 'https://frankbria.com' || 'https://beta.frankbria.com' }}
+      url: ${{ vars.STRAPI_URL }}
 
     steps:
       - name: Checkout code
@@ -41,8 +41,9 @@ jobs:
           # All configuration now comes from environment-specific secrets/vars
           echo "host=${{ secrets.DEPLOY_HOST }}" >> $GITHUB_OUTPUT
           echo "user=${{ secrets.DEPLOY_USER }}" >> $GITHUB_OUTPUT
-          echo "path=${{ vars.STRAPI_DEPLOY_PATH || '/var/nodejs/frankbria-strapi' }}" >> $GITHUB_OUTPUT
-          echo "pm2_name=${{ vars.STRAPI_PM2_NAME || 'strapi' }}" >> $GITHUB_OUTPUT
+          echo "path=${{ vars.STRAPI_DEPLOY_PATH }}" >> $GITHUB_OUTPUT
+          echo "pm2_name=${{ vars.STRAPI_PM2_NAME || 'frankbria-strapi' }}" >> $GITHUB_OUTPUT
+          echo "strapi_url=${{ vars.STRAPI_URL }}" >> $GITHUB_OUTPUT
           echo "environment=${{ github.ref_name == 'main' && 'production' || 'staging' }}" >> $GITHUB_OUTPUT
 
       - name: Setup SSH
@@ -63,24 +64,46 @@ jobs:
             set -e
 
             echo "📂 Navigating to Strapi directory..."
-            cd ${{ steps.deploy-config.outputs.path }}
+            STRAPI_PATH=$(echo "${{ steps.deploy-config.outputs.path }}" | tr -d '\r')
+            cd "$STRAPI_PATH"
 
-            # Pull latest changes
-            echo "⬇️  Pulling latest changes from ${{ github.ref_name }}..."
-            git fetch origin
-            git pull origin ${{ github.ref_name }}
+            # Check if this is a git repository
+            if [ -d ".git" ]; then
+              # Pull latest changes
+              echo "⬇️  Pulling latest changes from ${{ github.ref_name }}..."
+              git fetch origin
+              git pull origin ${{ github.ref_name }}
 
-            # Check if package.json changed
-            if git diff HEAD@{1} HEAD --name-only 2>/dev/null | grep -q "package.json"; then
-              echo "📥 Installing dependencies..."
-              npm ci
+              # Check if package.json changed
+              if git diff HEAD@{1} HEAD --name-only 2>/dev/null | grep -q "package.json"; then
+                echo "📥 Installing dependencies (package.json changed)..."
+                npm ci
+              elif [ ! -d "node_modules" ]; then
+                echo "📥 Installing dependencies (first deployment)..."
+                npm ci
+              else
+                echo "✓ Dependencies unchanged, skipping install"
+              fi
             else
-              echo "✓ Dependencies unchanged, skipping install"
+              echo "⚠️  Not a git repository, skipping git pull"
+              # Always install dependencies if not a git repo
+              if [ ! -d "node_modules" ]; then
+                echo "📥 Installing dependencies..."
+                npm ci
+              else
+                echo "✓ node_modules exists, skipping install"
+              fi
             fi
 
-            # Restart PM2 (Strapi doesn't need build step)
-            echo "♻️  Restarting Strapi..."
-            pm2 restart ${{ steps.deploy-config.outputs.pm2_name }} --update-env
+            # Start or restart PM2 process
+            if pm2 describe ${{ steps.deploy-config.outputs.pm2_name }} > /dev/null 2>&1; then
+              echo "♻️  Restarting Strapi..."
+              pm2 restart ${{ steps.deploy-config.outputs.pm2_name }} --update-env
+            else
+              echo "🚀 Starting Strapi for first time..."
+              pm2 start npm --name "${{ steps.deploy-config.outputs.pm2_name }}" -- run develop
+              pm2 save
+            fi
 
             # Wait for Strapi to start
             sleep 10
@@ -101,7 +124,7 @@ jobs:
           sleep 15
 
           # Try health check (may not be available in Strapi 5)
-          if ssh ${{ steps.deploy-config.outputs.user }}@${{ steps.deploy-config.outputs.host }} "curl -f ${{ steps.deploy-config.outputs.health_url }} 2>/dev/null"; then
+          if ssh ${{ steps.deploy-config.outputs.user }}@${{ steps.deploy-config.outputs.host }} "curl -f ${{ steps.deploy-config.outputs.strapi_url }} 2>/dev/null"; then
             echo "✅ Strapi API is healthy"
           else
             echo "⚠️  Health endpoint not available (this is normal for Strapi)"
