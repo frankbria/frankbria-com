@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.environment || (github.ref_name == 'master' && 'production' || 'staging') }}
-      url: ${{ (inputs.environment == 'production' || github.ref_name == 'master') && 'https://frankbria.com' || 'https://beta.frankbria.com' }}
+      url: ${{ vars.SITE_URL }}
 
     # Only run if not a draft PR
     if: github.event.pull_request.draft == false || github.event_name != 'pull_request'
