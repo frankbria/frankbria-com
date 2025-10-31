@@ -110,9 +110,12 @@ jobs:
             git fetch origin
             git pull origin ${{ github.ref_name }}
 
-            # Check if package.json changed
-            if git diff HEAD@{1} HEAD --name-only 2>/dev/null | grep -q "package.json"; then
-              echo "📥 Installing dependencies..."
+            # Install dependencies if package.json changed or node_modules missing
+            if [ ! -d "node_modules" ]; then
+              echo "📥 Installing dependencies (first deployment)..."
+              npm ci
+            elif git diff HEAD@{1} HEAD --name-only 2>/dev/null | grep -q "package.json"; then
+              echo "📥 Installing dependencies (package.json changed)..."
               npm ci
             else
               echo "✓ Dependencies unchanged, skipping install"
