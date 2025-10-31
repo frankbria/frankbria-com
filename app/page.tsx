@@ -12,9 +12,15 @@ export default async function Home() {
           <h2 className="text-3xl font-bold mb-8 text-center">Hey there, I'm Frank Bria</h2>
 
           <div className="flex flex-col md:flex-row gap-8 mb-12">
-            {/* Headshot placeholder */}
-            <div className="flex-shrink-0">
-              <div className="w-48 h-48 bg-gray-300 rounded-lg"></div>
+            {/* Frank's Headshot */}
+            <div className="flex-shrink-0 md:w-1/3">
+              <img
+                src="https://beta.frankbria.com/uploads/2024/01/frank-bria-headshot-pro-400x516.png"
+                alt="Frank Bria"
+                className="w-full h-auto rounded-lg"
+                width="400"
+                height="516"
+              />
             </div>
 
             {/* Bio text */}
@@ -46,8 +52,16 @@ export default async function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
             {/* High-Ticket Program */}
             <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
-              <a href="https://htp.frankbria.com" target="_blank" rel="noopener noreferrer" className="block">
-                <div className="w-full h-32 bg-gray-200 rounded mb-4"></div>
+              <a href="/category/think-tank" className="block">
+                <div className="flex items-center justify-center mb-4" style={{ minHeight: '200px' }}>
+                  <img
+                    src="https://beta.frankbria.com/uploads/2019/05/HTP-Logo-bk-e1557603932149-400x133.png"
+                    alt="High-Ticket Program Logo"
+                    className="max-h-[200px] w-auto rounded"
+                    width="400"
+                    height="133"
+                  />
+                </div>
                 <h5 className="text-lg font-semibold text-gray-900">
                   Small B2B Services Businesses Looking to Grow to 7 Figures
                 </h5>
@@ -57,29 +71,17 @@ export default async function Home() {
             {/* Frank Bria Music */}
             <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
               <a href="https://frankbriamusic.com" target="_blank" rel="noopener noreferrer" className="block">
-                <div className="w-full h-32 bg-gray-200 rounded mb-4"></div>
+                <div className="flex items-center justify-center mb-4" style={{ minHeight: '200px' }}>
+                  <img
+                    src="/FB_music_logo_v2_trans_dark_4x.png"
+                    alt="Frank Bria Music Logo"
+                    className="max-h-[200px] w-auto rounded"
+                    width="400"
+                    height="124"
+                  />
+                </div>
                 <h5 className="text-lg font-semibold text-gray-900">
                   Orchestral Film & Media Composer
-                </h5>
-              </a>
-            </div>
-
-            {/* 6 to 7 Figures Show Podcast */}
-            <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
-              <a href="https://frankbria.com/podcast" target="_blank" rel="noopener noreferrer" className="block">
-                <div className="w-full h-32 bg-gray-200 rounded mb-4"></div>
-                <h5 className="text-lg font-semibold text-gray-900">
-                  The 6 to 7 Figures Show Podcast
-                </h5>
-              </a>
-            </div>
-
-            {/* SaaS CX Show Podcast */}
-            <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
-              <a href="http://saascx.show" target="_blank" rel="noopener noreferrer" className="block">
-                <div className="w-full h-32 bg-gray-200 rounded mb-4"></div>
-                <h5 className="text-lg font-semibold text-gray-900">
-                  The SaaS CX Show Podcast
                 </h5>
               </a>
             </div>
@@ -87,7 +89,15 @@ export default async function Home() {
             {/* Scale Book */}
             <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
               <a href="https://www.amazon.com/Scale-Grow-Your-Business-Working-ebook/dp/B00YW8OIGS" target="_blank" rel="noopener noreferrer" className="block">
-                <div className="w-full h-32 bg-gray-200 rounded mb-4"></div>
+                <div className="flex items-center justify-center mb-4" style={{ minHeight: '200px' }}>
+                  <img
+                    src="https://beta.frankbria.com/uploads/2020/03/3d_book_2_med.png"
+                    alt="Scale Book Cover"
+                    className="max-h-[200px] w-auto rounded"
+                    width="400"
+                    height="534"
+                  />
+                </div>
                 <h5 className="text-lg font-semibold text-gray-900">
                   Scale: How to Grow Your Business by Working Less
                 </h5>
@@ -97,11 +107,39 @@ export default async function Home() {
             {/* Seven Billion Banks Book */}
             <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
               <a href="https://www.amazon.com/Seven-Billion-Banks-Personalized-Experience/dp/0985725435" target="_blank" rel="noopener noreferrer" className="block">
-                <div className="w-full h-32 bg-gray-200 rounded mb-4"></div>
+                <div className="flex items-center justify-center mb-4" style={{ minHeight: '200px' }}>
+                  <img
+                    src="https://beta.frankbria.com/uploads/2020/03/3d_book.png"
+                    alt="Seven Billion Banks Book Cover"
+                    className="max-h-[200px] w-auto rounded"
+                    width="512"
+                    height="756"
+                  />
+                </div>
                 <h5 className="text-lg font-semibold text-gray-900">
                   Seven Billion Banks: How a Personalized Banking Experience Will Save the Industry
                 </h5>
               </a>
+            </div>
+
+            {/* 6 to 7 Figures Show Podcast - Centered in row */}
+            <div className="md:col-span-2 flex justify-center">
+              <div className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow md:w-1/2">
+                <a href="https://open.spotify.com/show/0xcYcgrzcnsff0mkNX0fGh" target="_blank" rel="noopener noreferrer" className="block">
+                  <div className="flex items-center justify-center mb-4" style={{ minHeight: '200px' }}>
+                    <img
+                      src="https://beta.frankbria.com/uploads/2019/05/6_to_7_figures_cover_sq_300.jpg"
+                      alt="6 to 7 Figures Show Podcast Cover"
+                      className="max-h-[200px] w-auto rounded"
+                      width="300"
+                      height="300"
+                    />
+                  </div>
+                  <h5 className="text-lg font-semibold text-gray-900">
+                    The 6 to 7 Figures Show Podcast
+                  </h5>
+                </a>
+              </div>
             </div>
           </div>
         </article>

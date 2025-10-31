@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-50 border-t border-gray-200 mt-16">
+    <footer className="bg-gray-900 border-t border-gray-800 mt-16">
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex flex-col items-center gap-4 text-center">
           <div className="flex gap-4">
@@ -10,7 +10,7 @@ export default function Footer() {
               href="http://facebook.com/7figuresexpert"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-600 hover:text-blue-600 transition-colors"
+              className="text-gray-400 hover:text-white transition-colors"
               aria-label="Facebook"
             >
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -21,7 +21,7 @@ export default function Footer() {
               href="http://instagram.com/frank.bria"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-600 hover:text-pink-600 transition-colors"
+              className="text-gray-400 hover:text-white transition-colors"
               aria-label="Instagram"
             >
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -30,21 +30,21 @@ export default function Footer() {
             </a>
           </div>
 
-          <div className="text-sm text-gray-600 max-w-3xl">
+          <div className="text-sm text-gray-400 max-w-3xl">
             <p className="mb-2">
               We are a consulting and mentorship firm and do not guarantee any specific income. See our{' '}
-              <Link href="/earnings-disclaimer" className="text-blue-600 hover:underline">
+              <Link href="/earnings-disclaimer" className="text-gray-300 hover:text-white underline">
                 Earnings Disclaimer
               </Link>{' '}
               for more information.
             </p>
             <p>
-              © 2019 Noatak Enterprises, LLC, dba High-Ticket Program | All rights reserved |{' '}
-              <Link href="/terms" className="text-blue-600 hover:underline">
+              © 2025 Noatak Enterprises, LLC, dba High-Ticket Program and Bria Strategy Group | All rights reserved |{' '}
+              <Link href="/terms" className="text-gray-300 hover:text-white underline">
                 Terms and Conditions
               </Link>{' '}
               |{' '}
-              <Link href="/privacy-policy" className="text-blue-600 hover:underline">
+              <Link href="/privacy-policy" className="text-gray-300 hover:text-white underline">
                 Privacy Policy
               </Link>
             </p>

@@ -2,6 +2,14 @@
 node_modules/
 .next/
 .env.local
+.env.server
+.env
+.env.production
 venv/
 *.pyc
 __pycache__/
+
+# Test coverage reports
+coverage/
+*.lcov
+.nyc_output/

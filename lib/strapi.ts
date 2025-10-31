@@ -1,23 +1,57 @@
 import axios from 'axios';
 
-const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
-const strapiToken = process.env.STRAPI_API_TOKEN || '';
+// Create client lazily to ensure environment variables are loaded
+function getStrapiClient() {
+  const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || process.env.STRAPI_URL || 'http://localhost:1337';
+  const strapiToken = process.env.STRAPI_API_TOKEN || '';
 
-export const strapiClient = axios.create({
-  baseURL: `${strapiUrl}/api`,
-  headers: {
-    'Authorization': `Bearer ${strapiToken}`,
-  },
-});
+  return axios.create({
+    baseURL: `${strapiUrl}/api`,
+    headers: {
+      'Authorization': `Bearer ${strapiToken}`,
+    },
+  });
+}
+
+// Legacy export for compatibility
+export const strapiClient = getStrapiClient();
 
 export async function getAllPosts() {
   try {
-    // Fetch with pagination to get all posts (default page size is 25)
-    const response = await strapiClient.get('/posts?populate=*&sort=publishedDate:desc&pagination[pageSize]=100');
+    // Create a fresh client for this request
+    const client = getStrapiClient();
+    const response = await client.get('/posts?populate=*&sort=publishedDate:desc&pagination[pageSize]=100');
     return response.data.data;
   } catch (error: any) {
     console.error('Error fetching posts:', error.message);
     return [];
+  }
+}
+
+export async function getPaginatedPosts(page: number = 1, pageSize: number = 12) {
+  try {
+    const client = getStrapiClient();
+    const response = await client.get(
+      `/posts?populate=*&sort=publishedDate:desc&pagination[page]=${page}&pagination[pageSize]=${pageSize}`
+    );
+
+    return {
+      data: response.data.data,
+      meta: response.data.meta
+    };
+  } catch (error: any) {
+    console.error('Error fetching paginated posts:', error.message);
+    return {
+      data: [],
+      meta: {
+        pagination: {
+          page: 1,
+          pageSize: pageSize,
+          pageCount: 0,
+          total: 0
+        }
+      }
+    };
   }
 }
 
@@ -77,5 +111,132 @@ export async function getPageBySlug(slug: string) {
   } catch (error) {
     console.error('Error fetching page:', error);
     return null;
+  }
+}
+
+// Category API Functions
+
+export async function getAllCategories() {
+  try {
+    const client = getStrapiClient();
+    const response = await client.get('/categories?populate=*&sort=name:asc');
+    return response.data.data;
+  } catch (error: any) {
+    console.error('Error fetching categories:', error.message);
+    return [];
+  }
+}
+
+export async function getCategoryBySlug(slug: string) {
+  try {
+    const client = getStrapiClient();
+    const response = await client.get(`/categories?filters[slug][$eq]=${slug}&populate=*`);
+    const rawCategory = response.data.data[0] || null;
+
+    if (!rawCategory) {
+      return null;
+    }
+
+    // Normalize to consistent format (handle both flat and attributes structure)
+    const category = rawCategory.attributes ? rawCategory : {
+      id: rawCategory.id,
+      documentId: rawCategory.documentId,
+      attributes: {
+        name: rawCategory.name,
+        slug: rawCategory.slug,
+        description: rawCategory.description || '',
+      }
+    };
+
+    return category;
+  } catch (error: any) {
+    console.error('Error fetching category by slug:', slug, error.message);
+    return null;
+  }
+}
+
+export async function getPostsByCategory(
+  categorySlug: string,
+  page: number = 1,
+  pageSize: number = 12
+) {
+  try {
+    const client = getStrapiClient();
+    const response = await client.get(
+      `/posts?filters[categories][slug][$eq]=${categorySlug}&populate=*&sort=publishedDate:desc&pagination[page]=${page}&pagination[pageSize]=${pageSize}`
+    );
+
+    return {
+      data: response.data.data,
+      meta: response.data.meta
+    };
+  } catch (error: any) {
+    console.error('Error fetching posts for category:', categorySlug, error.message);
+    return {
+      data: [],
+      meta: {
+        pagination: {
+          page: 1,
+          pageSize: pageSize,
+          pageCount: 0,
+          total: 0
+        }
+      }
+    };
+  }
+}
+
+/**
+ * Fetches related posts based on shared categories
+ *
+ * @param postId - The ID of the current post to exclude from results
+ * @param categoryIds - Array of category IDs to match against
+ * @param limit - Maximum number of posts to return (default: 3)
+ * @returns Array of related posts, or empty array on error
+ *
+ * @example
+ * // Get 3 related posts from same categories
+ * const related = await getRelatedPosts(1, [2, 3], 3);
+ *
+ * @example
+ * // Fallback to recent posts when no categories
+ * const recent = await getRelatedPosts(1, [], 3);
+ */
+export async function getRelatedPosts(
+  postId: number,
+  categoryIds: number[],
+  limit: number = 3
+): Promise<any[]> {
+  try {
+    const client = getStrapiClient();
+
+    if (categoryIds.length === 0) {
+      // Fallback: get recent posts when no categories provided
+      const response = await client.get('/posts', {
+        params: {
+          'filters[id][$ne]': postId,
+          'populate': '*',
+          'pagination[pageSize]': limit,
+          'sort': 'publishedDate:desc',
+        },
+      });
+      return response.data.data || [];
+    }
+
+    // Get posts with matching categories, excluding current post
+    const response = await client.get('/posts', {
+      params: {
+        'filters[categories][id][$in]': categoryIds,
+        'filters[id][$ne]': postId,
+        'populate': '*',
+        'pagination[pageSize]': limit,
+        'sort': 'publishedDate:desc',
+      },
+    });
+
+    return response.data.data || [];
+  } catch (error) {
+    console.error('Error fetching related posts:', error);
+    return [];
   }
 }

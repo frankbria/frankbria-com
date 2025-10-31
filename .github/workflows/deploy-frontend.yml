@@ -1,0 +1,181 @@
+name: Deploy Frontend (Next.js)
+
+on:
+  push:
+    branches:
+      # - main           # Production - DISABLED until MVP approved
+      - develop        # Development
+      - 'claude/**'    # AI development branches
+    paths:
+      - 'app/**'
+      - 'components/**'
+      - 'lib/**'
+      - 'public/**'
+      - 'styles/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'next.config.js'
+      - 'next.config.mjs'
+      - 'tailwind.config.ts'
+      - 'tailwind.config.js'
+      - '.github/workflows/deploy-frontend.yml'
+
+  workflow_dispatch:  # Manual trigger
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  deploy-frontend:
+    name: Deploy to ${{ github.ref_name == 'main' && 'Production' || 'Development' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+      url: ${{ github.ref_name == 'main' && 'https://frankbria.com' || 'https://beta.frankbria.com' }}
+
+    # Only run if not a draft PR
+    if: github.event.pull_request.draft == false || github.event_name != 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+        continue-on-error: true  # Don't fail deployment on lint errors
+
+      - name: Build Next.js
+        run: npm run build
+        env:
+          NEXT_PUBLIC_STRAPI_URL: ${{ vars.STRAPI_URL || 'https://beta.frankbria.com' }}
+
+      - name: Set deployment configuration
+        id: deploy-config
+        run: |
+          # All configuration now comes from environment-specific secrets/vars
+          echo "host=${{ secrets.DEPLOY_HOST }}" >> $GITHUB_OUTPUT
+          echo "user=${{ secrets.DEPLOY_USER }}" >> $GITHUB_OUTPUT
+          echo "path=${{ vars.DEPLOY_PATH }}" >> $GITHUB_OUTPUT
+          echo "pm2_name=${{ vars.PM2_PROCESS_NAME || 'frankbria-nextjs' }}" >> $GITHUB_OUTPUT
+          echo "health_url=${{ vars.SITE_URL }}" >> $GITHUB_OUTPUT
+          echo "environment=${{ github.ref_name == 'main' && 'production' || 'staging' }}" >> $GITHUB_OUTPUT
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Add server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ steps.deploy-config.outputs.host }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to ${{ steps.deploy-config.outputs.environment }}
+        run: |
+          echo "🚀 Deploying to ${{ steps.deploy-config.outputs.environment }}..."
+
+          ssh ${{ steps.deploy-config.outputs.user }}@${{ steps.deploy-config.outputs.host }} << 'ENDSSH'
+            set -e
+
+            echo "📂 Navigating to deployment directory..."
+            cd ${{ steps.deploy-config.outputs.path }}
+
+            # Backup current build
+            if [ -d ".next" ]; then
+              echo "📦 Backing up current build..."
+              TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+              mv .next .next.backup.$TIMESTAMP
+              # Keep only last 3 backups
+              ls -dt .next.backup.* 2>/dev/null | tail -n +4 | xargs rm -rf 2>/dev/null || true
+            fi
+
+            # Pull latest changes
+            echo "⬇️  Pulling latest changes from ${{ github.ref_name }}..."
+            git fetch origin
+            git pull origin ${{ github.ref_name }}
+
+            # Check if package.json changed
+            if git diff HEAD@{1} HEAD --name-only 2>/dev/null | grep -q "package.json"; then
+              echo "📥 Installing dependencies..."
+              npm ci
+            else
+              echo "✓ Dependencies unchanged, skipping install"
+            fi
+
+            # Build
+            echo "🔨 Building Next.js..."
+            npm run build
+
+            # Restart PM2
+            echo "♻️  Restarting PM2 process..."
+            pm2 restart ${{ steps.deploy-config.outputs.pm2_name }} --update-env
+
+            # Wait for process to be online
+            sleep 5
+
+            # Verify PM2 status
+            if pm2 describe ${{ steps.deploy-config.outputs.pm2_name }} | grep -q "online"; then
+              echo "✅ Deployment successful!"
+              # Clean up old backups on success
+              ls -dt .next.backup.* 2>/dev/null | tail -n +4 | xargs rm -rf 2>/dev/null || true
+            else
+              echo "❌ PM2 process failed to start!"
+              # Rollback to previous build
+              if [ -d ".next.backup.$(ls -t .next.backup.* 2>/dev/null | head -1)" ]; then
+                echo "⏮️  Rolling back to previous build..."
+                rm -rf .next
+                mv $(ls -dt .next.backup.* | head -1) .next
+                pm2 restart ${{ steps.deploy-config.outputs.pm2_name }}
+              fi
+              exit 1
+            fi
+          ENDSSH
+
+      - name: Verify deployment
+        run: |
+          echo "🏥 Running health check..."
+          sleep 10
+
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${{ steps.deploy-config.outputs.health_url }}")
+
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Site is responding correctly at ${{ steps.deploy-config.outputs.health_url }}"
+            echo "✅ HTTP Status: $HTTP_CODE"
+          else
+            echo "⚠️  Site health check failed at ${{ steps.deploy-config.outputs.health_url }}"
+            echo "❌ HTTP Status: $HTTP_CODE (expected 200)"
+            exit 1
+          fi
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Frontend deployment failed for branch ${{ github.ref_name }}"
+          echo "::error::Environment: ${{ steps.deploy-config.outputs.environment }}"
+          echo "::error::Check the logs above for details"
+
+      - name: Deployment summary
+        if: success()
+        run: |
+          echo "## ✅ Deployment Successful" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: ${{ steps.deploy-config.outputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **URL**: ${{ steps.deploy-config.outputs.health_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Author**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY

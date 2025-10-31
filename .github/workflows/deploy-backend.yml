@@ -1,0 +1,126 @@
+name: Deploy Backend (Strapi)
+
+on:
+  push:
+    branches:
+      # - main         # Production - DISABLED until MVP approved
+      - develop      # Development
+    paths:
+      - 'strapi/**'
+      - 'config/**'
+      - 'src/**'
+      - 'database/**'
+      - '.github/workflows/deploy-backend.yml'
+
+  workflow_dispatch:  # Manual trigger
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  deploy-backend:
+    name: Deploy Strapi to ${{ github.ref_name == 'main' && 'Production' || 'Development' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+      url: ${{ github.ref_name == 'main' && 'https://frankbria.com' || 'https://beta.frankbria.com' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set deployment configuration
+        id: deploy-config
+        run: |
+          # All configuration now comes from environment-specific secrets/vars
+          echo "host=${{ secrets.DEPLOY_HOST }}" >> $GITHUB_OUTPUT
+          echo "user=${{ secrets.DEPLOY_USER }}" >> $GITHUB_OUTPUT
+          echo "path=${{ vars.STRAPI_DEPLOY_PATH || '/var/nodejs/frankbria-strapi' }}" >> $GITHUB_OUTPUT
+          echo "pm2_name=${{ vars.STRAPI_PM2_NAME || 'strapi' }}" >> $GITHUB_OUTPUT
+          echo "environment=${{ github.ref_name == 'main' && 'production' || 'staging' }}" >> $GITHUB_OUTPUT
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Add server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ steps.deploy-config.outputs.host }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to ${{ steps.deploy-config.outputs.environment }}
+        run: |
+          echo "🚀 Deploying Strapi to ${{ steps.deploy-config.outputs.environment }}..."
+
+          ssh ${{ steps.deploy-config.outputs.user }}@${{ steps.deploy-config.outputs.host }} << 'ENDSSH'
+            set -e
+
+            echo "📂 Navigating to Strapi directory..."
+            cd ${{ steps.deploy-config.outputs.path }}
+
+            # Pull latest changes
+            echo "⬇️  Pulling latest changes from ${{ github.ref_name }}..."
+            git fetch origin
+            git pull origin ${{ github.ref_name }}
+
+            # Check if package.json changed
+            if git diff HEAD@{1} HEAD --name-only 2>/dev/null | grep -q "package.json"; then
+              echo "📥 Installing dependencies..."
+              npm ci
+            else
+              echo "✓ Dependencies unchanged, skipping install"
+            fi
+
+            # Restart PM2 (Strapi doesn't need build step)
+            echo "♻️  Restarting Strapi..."
+            pm2 restart ${{ steps.deploy-config.outputs.pm2_name }} --update-env
+
+            # Wait for Strapi to start
+            sleep 10
+
+            # Verify PM2 status
+            if pm2 describe ${{ steps.deploy-config.outputs.pm2_name }} | grep -q "online"; then
+              echo "✅ Strapi deployment successful!"
+            else
+              echo "❌ Strapi failed to start!"
+              pm2 logs ${{ steps.deploy-config.outputs.pm2_name }} --lines 50
+              exit 1
+            fi
+          ENDSSH
+
+      - name: Verify API health
+        run: |
+          echo "🏥 Running health check..."
+          sleep 15
+
+          # Try health check (may not be available in Strapi 5)
+          if ssh ${{ steps.deploy-config.outputs.user }}@${{ steps.deploy-config.outputs.host }} "curl -f ${{ steps.deploy-config.outputs.health_url }} 2>/dev/null"; then
+            echo "✅ Strapi API is healthy"
+          else
+            echo "⚠️  Health endpoint not available (this is normal for Strapi)"
+            echo "✅ Strapi deployment complete (PM2 reports online)"
+          fi
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Backend deployment failed for branch ${{ github.ref_name }}"
+          echo "::error::Environment: ${{ steps.deploy-config.outputs.environment }}"
+          echo "::error::Check the logs above for details"
+
+      - name: Deployment summary
+        if: success()
+        run: |
+          echo "## ✅ Strapi Deployment Successful" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: ${{ steps.deploy-config.outputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Author**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
