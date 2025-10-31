@@ -93,7 +93,8 @@ jobs:
             set -e
 
             echo "📂 Navigating to deployment directory..."
-            cd ${{ steps.deploy-config.outputs.path }}
+            DEPLOY_PATH=$(echo "${{ steps.deploy-config.outputs.path }}" | tr -d '\r')
+            cd "$DEPLOY_PATH"
 
             # Backup current build
             if [ -d ".next" ]; then
