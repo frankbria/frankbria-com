@@ -10,7 +10,7 @@ export default function Header() {
         <div className="flex items-center justify-between">
           <Link href="/" className="hover:opacity-80 transition-opacity">
             <Image
-              src="/uploads/2015/12/logo_back_clipped_rev_1-e1572167361317.png"
+              src="/images/logo.png"
               alt="Frank Bria"
               width={272}
               height={103}

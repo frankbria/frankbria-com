@@ -15,7 +15,7 @@ export default async function Home() {
             {/* Frank's Headshot */}
             <div className="flex-shrink-0 md:w-1/3">
               <img
-                src="/uploads/2024/01/frank-bria-headshot-pro-400x516.png"
+                src="/images/frank-bria-headshot.png"
                 alt="Frank Bria"
                 className="w-full h-auto rounded-lg"
                 width="400"
@@ -55,7 +55,7 @@ export default async function Home() {
               <a href="/category/think-tank" className="block">
                 <div className="flex items-center justify-center mb-4" style={{ minHeight: '200px' }}>
                   <img
-                    src="/uploads/2019/05/HTP-Logo-bk-e1557603932149-400x133.png"
+                    src="/images/htp-logo.png"
                     alt="High-Ticket Program Logo"
                     className="max-h-[200px] w-auto rounded"
                     width="400"
@@ -91,7 +91,7 @@ export default async function Home() {
               <a href="https://www.amazon.com/Scale-Grow-Your-Business-Working-ebook/dp/B00YW8OIGS" target="_blank" rel="noopener noreferrer" className="block">
                 <div className="flex items-center justify-center mb-4" style={{ minHeight: '200px' }}>
                   <img
-                    src="/uploads/2020/03/3d_book_2_med.png"
+                    src="/images/scale-book.png"
                     alt="Scale Book Cover"
                     className="max-h-[200px] w-auto rounded"
                     width="400"
@@ -109,7 +109,7 @@ export default async function Home() {
               <a href="https://www.amazon.com/Seven-Billion-Banks-Personalized-Experience/dp/0985725435" target="_blank" rel="noopener noreferrer" className="block">
                 <div className="flex items-center justify-center mb-4" style={{ minHeight: '200px' }}>
                   <img
-                    src="/uploads/2020/03/3d_book.png"
+                    src="/images/seven-billion-banks-book.png"
                     alt="Seven Billion Banks Book Cover"
                     className="max-h-[200px] w-auto rounded"
                     width="512"
@@ -128,7 +128,7 @@ export default async function Home() {
                 <a href="https://open.spotify.com/show/0xcYcgrzcnsff0mkNX0fGh" target="_blank" rel="noopener noreferrer" className="block">
                   <div className="flex items-center justify-center mb-4" style={{ minHeight: '200px' }}>
                     <img
-                      src="/uploads/2019/05/6_to_7_figures_cover_sq_300.jpg"
+                      src="/images/podcast-cover.jpg"
                       alt="6 to 7 Figures Show Podcast Cover"
                       className="max-h-[200px] w-auto rounded"
                       width="300"
