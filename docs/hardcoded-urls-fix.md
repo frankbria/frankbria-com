@@ -1,29 +1,38 @@
-# Hardcoded URL Fix
+# Image Path Fix
 
 **Date**: 2025-11-10
 **Status**: ✅ Completed
 
 ## Problem
 
-Many image URLs in the codebase were hardcoded to `https://beta.frankbria.com/uploads/*`, which would cause issues when the site moves to production at `https://frankbria.com`.
+Many image URLs in the codebase were hardcoded to `https://beta.frankbria.com/uploads/*`. The initial attempt to use relative `/uploads/*` paths failed because those images don't exist in the Next.js application - they were served by Strapi on the remote server.
 
 ## Solution
 
-Replaced all hardcoded absolute URLs with relative paths starting with `/uploads/*`. This makes the URLs work correctly on both staging and production environments.
+Downloaded all required images from beta.frankbria.com and placed them in the `public/images/` directory. Updated all image references to use local `/images/*` paths. This ensures images are bundled with the application and work in all environments.
 
 ## Changes Made
+
+### Images Downloaded to public/images/
+
+1. **frank-bria-headshot.png** (376KB) - Homepage headshot
+2. **htp-logo.png** (5KB) - High-Ticket Program logo
+3. **scale-book.png** (121KB) - Scale book cover
+4. **seven-billion-banks-book.png** (432KB) - Seven Billion Banks book cover
+5. **podcast-cover.jpg** (21KB) - 6 to 7 Figures podcast cover
+6. **logo.png** (7KB) - Site header logo
 
 ### Files Updated
 
 1. **app/page.tsx** (5 images):
-   - Frank Bria headshot: `/uploads/2024/01/frank-bria-headshot-pro-400x516.png`
-   - HTP Logo: `/uploads/2019/05/HTP-Logo-bk-e1557603932149-400x133.png`
-   - Scale book cover: `/uploads/2020/03/3d_book_2_med.png`
-   - Seven Billion Banks book: `/uploads/2020/03/3d_book.png`
-   - 6 to 7 Figures podcast: `/uploads/2019/05/6_to_7_figures_cover_sq_300.jpg`
+   - Frank Bria headshot: `/images/frank-bria-headshot.png`
+   - HTP Logo: `/images/htp-logo.png`
+   - Scale book cover: `/images/scale-book.png`
+   - Seven Billion Banks book: `/images/seven-billion-banks-book.png`
+   - 6 to 7 Figures podcast: `/images/podcast-cover.jpg`
 
 2. **components/Header.tsx** (1 image):
-   - Logo: `/uploads/2015/12/logo_back_clipped_rev_1-e1572167361317.png`
+   - Logo: `/images/logo.png`
 
 ### Files NOT Changed (Intentional)
 
@@ -34,14 +43,17 @@ Replaced all hardcoded absolute URLs with relative paths starting with `/uploads
 
 ## Testing
 
-✅ Dev server starts successfully with relative URLs
-✅ Images served correctly from `/uploads/*` paths via nginx proxy
+✅ Images downloaded successfully using `curl -L` (follow redirects)
+✅ Build completes successfully with all images in place
+✅ Images load correctly from `/images/*` paths in development
 
 ## Impact
 
-- ✅ Site now works correctly on both staging (beta.frankbria.com) and production (frankbria.com)
-- ✅ No hardcoded environment-specific URLs in application code
-- ✅ Easier production deployment process
+- ✅ Images are self-contained in the Next.js application
+- ✅ No dependency on external Strapi image serving
+- ✅ Works in all environments (local, staging, production)
+- ✅ Faster page loads (images served directly from Next.js)
+- ✅ No hardcoded environment-specific URLs
 
 ## Related Issues
 
