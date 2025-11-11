@@ -13,3 +13,7 @@ __pycache__/
 coverage/
 *.lcov
 .nyc_output/
+
+# Beads database
+.beads/
+!.beads/*.jsonl
