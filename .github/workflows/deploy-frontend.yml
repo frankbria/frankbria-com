@@ -108,14 +108,12 @@ jobs:
             fi
 
             echo "📂 Navigating to deployment directory..."
-            DEPLOY_PATH=$$(echo "${{ steps.deploy-config.outputs.path }}" | tr -d '\r')
-            cd "$$DEPLOY_PATH"
+            cd "${{ steps.deploy-config.outputs.path }}"
 
             # Backup current build
             if [ -d ".next" ]; then
               echo "📦 Backing up current build..."
-              TIMESTAMP=$$(date +%Y%m%d_%H%M%S)
-              mv .next .next.backup.$$TIMESTAMP
+              mv .next .next.backup.\$(date +%Y%m%d_%H%M%S)
               # Keep only last 3 backups
               ls -dt .next.backup.* 2>/dev/null | tail -n +4 | xargs rm -rf 2>/dev/null || true
             fi
