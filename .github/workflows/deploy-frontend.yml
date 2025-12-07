@@ -92,13 +92,7 @@ jobs:
           echo "🚀 Deploying to ${{ steps.deploy-config.outputs.environment }}..."
 
           # Pass environment variables as arguments to the remote script
-          ssh ${{ steps.deploy-config.outputs.user }}@${{ steps.deploy-config.outputs.host }} \
-            "DEPLOY_PATH='${{ steps.deploy-config.outputs.path }}' \
-             PM2_NAME='${{ steps.deploy-config.outputs.pm2_name }}' \
-             GIT_BRANCH='${{ github.ref_name }}' \
-             STRAPI_URL='${{ vars.STRAPI_URL }}' \
-             STRAPI_TOKEN='${{ secrets.STRAPI_API_TOKEN }}' \
-             bash -s" << 'ENDSSH'
+          ssh ${{ steps.deploy-config.outputs.user }}@${{ steps.deploy-config.outputs.host }} "DEPLOY_PATH='${{ steps.deploy-config.outputs.path }}' PM2_NAME='${{ steps.deploy-config.outputs.pm2_name }}' GIT_BRANCH='${{ github.ref_name }}' STRAPI_URL='${{ vars.STRAPI_URL }}' STRAPI_TOKEN='${{ secrets.STRAPI_API_TOKEN }}' bash -s" << 'ENDSSH'
             set -e
 
             # Load NVM if available
