@@ -102,9 +102,9 @@ jobs:
               echo "🔧 Loading NVM..."
               . "$$NVM_DIR/nvm.sh"
               nvm use 20 || nvm install 20
-              echo "✓ Using Node $$(node --version)"
+              echo "✓ Using Node 20 via NVM"
             else
-              echo "⚠️  NVM not found, using system Node $$(node --version)"
+              echo "⚠️  NVM not found, using system Node"
             fi
 
             echo "📂 Navigating to deployment directory..."
