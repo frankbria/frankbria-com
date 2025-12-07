@@ -136,10 +136,8 @@ jobs:
 
             # Create production environment file
             echo "📝 Creating .env.production..."
-            cat > .env.production << EOF
-NEXT_PUBLIC_STRAPI_URL=$STRAPI_URL
-STRAPI_API_TOKEN=$STRAPI_TOKEN
-EOF
+            echo "NEXT_PUBLIC_STRAPI_URL=$STRAPI_URL" > .env.production
+            echo "STRAPI_API_TOKEN=$STRAPI_TOKEN" >> .env.production
 
             # Build Next.js with production env
             echo "🔨 Building Next.js..."
