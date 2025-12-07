@@ -16,12 +16,26 @@ function getStrapiClient() {
 // Legacy export for compatibility
 export const strapiClient = getStrapiClient();
 
+// Normalize Strapi snake_case fields to camelCase for frontend consistency
+function normalizePost(post: any) {
+  if (!post) return null;
+
+  return {
+    ...post,
+    publishedDate: post.published_date || post.publishedDate,
+    seoTitle: post.seo_title || post.seoTitle,
+    seoDescription: post.seo_description || post.seoDescription,
+    wpPostId: post.wp_post_id || post.wpPostId,
+    featuredImage: post.featured_image || post.featuredImage,
+  };
+}
+
 export async function getAllPosts() {
   try {
     // Create a fresh client for this request
     const client = getStrapiClient();
-    const response = await client.get('/posts?populate=*&sort=publishedDate:desc&pagination[pageSize]=100');
-    return response.data.data;
+    const response = await client.get('/posts?populate=*&sort=published_date:desc&pagination[pageSize]=100');
+    return response.data.data.map(normalizePost);
   } catch (error: any) {
     console.error('Error fetching posts:', error.message);
     return [];
@@ -32,11 +46,11 @@ export async function getPaginatedPosts(page: number = 1, pageSize: number = 12)
   try {
     const client = getStrapiClient();
     const response = await client.get(
-      `/posts?populate=*&sort=publishedDate:desc&pagination[page]=${page}&pagination[pageSize]=${pageSize}`
+      `/posts?populate=*&sort=published_date:desc&pagination[page]=${page}&pagination[pageSize]=${pageSize}`
     );
 
     return {
-      data: response.data.data,
+      data: response.data.data.map(normalizePost),
       meta: response.data.meta
     };
   } catch (error: any) {
@@ -74,11 +88,11 @@ export async function getPostBySlug(slug: string) {
         slug: rawPost.slug,
         content: rawPost.content,
         excerpt: rawPost.excerpt,
-        publishedDate: rawPost.publishedDate,
+        publishedDate: rawPost.published_date || rawPost.publishedDate,
         author: rawPost.author,
-        seoTitle: rawPost.seoTitle,
-        seoDescription: rawPost.seoDescription,
-        wpPostId: rawPost.wpPostId,
+        seoTitle: rawPost.seo_title || rawPost.seoTitle,
+        seoDescription: rawPost.seo_description || rawPost.seoDescription,
+        wpPostId: rawPost.wp_post_id || rawPost.wpPostId,
         createdAt: rawPost.createdAt,
         updatedAt: rawPost.updatedAt,
         publishedAt: rawPost.publishedAt,
@@ -163,11 +177,11 @@ export async function getPostsByCategory(
   try {
     const client = getStrapiClient();
     const response = await client.get(
-      `/posts?filters[categories][slug][$eq]=${categorySlug}&populate=*&sort=publishedDate:desc&pagination[page]=${page}&pagination[pageSize]=${pageSize}`
+      `/posts?filters[categories][slug][$eq]=${categorySlug}&populate=*&sort=published_date:desc&pagination[page]=${page}&pagination[pageSize]=${pageSize}`
     );
 
     return {
-      data: response.data.data,
+      data: response.data.data.map(normalizePost),
       meta: response.data.meta
     };
   } catch (error: any) {
@@ -217,10 +231,10 @@ export async function getRelatedPosts(
           'filters[id][$ne]': postId,
           'populate': '*',
           'pagination[pageSize]': limit,
-          'sort': 'publishedDate:desc',
+          'sort': 'published_date:desc',
         },
       });
-      return response.data.data || [];
+      return (response.data.data || []).map(normalizePost);
     }
 
     // Get posts with matching categories, excluding current post
@@ -230,11 +244,11 @@ export async function getRelatedPosts(
         'filters[id][$ne]': postId,
         'populate': '*',
         'pagination[pageSize]': limit,
-        'sort': 'publishedDate:desc',
+        'sort': 'published_date:desc',
       },
     });
 
-    return response.data.data || [];
+    return (response.data.data || []).map(normalizePost);
   } catch (error) {
     console.error('Error fetching related posts:', error);
     return [];
