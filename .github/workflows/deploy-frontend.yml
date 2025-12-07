@@ -90,7 +90,10 @@ jobs:
         run: |
           echo "🚀 Deploying to ${{ steps.deploy-config.outputs.environment }}..."
 
-          ssh ${{ steps.deploy-config.outputs.user }}@${{ steps.deploy-config.outputs.host }} << 'ENDSSH'
+          ssh ${{ steps.deploy-config.outputs.user }}@${{ steps.deploy-config.outputs.host }} \
+            STRAPI_URL_VAR="${{ vars.STRAPI_URL }}" \
+            STRAPI_TOKEN_VAR="${{ secrets.STRAPI_API_TOKEN }}" \
+            << 'ENDSSH'
             set -e
 
             # Load NVM if it exists
@@ -135,10 +138,9 @@ jobs:
 
             # Create production environment file
             echo "📝 Creating .env.production..."
-            cat > .env.production << 'EOF'
-NEXT_PUBLIC_STRAPI_URL=${{ vars.STRAPI_URL }}
-STRAPI_API_TOKEN=${{ secrets.STRAPI_API_TOKEN }}
-REVALIDATION_SECRET=${{ secrets.REVALIDATION_SECRET || 'change_me' }}
+            cat > .env.production << EOF
+NEXT_PUBLIC_STRAPI_URL=$STRAPI_URL_VAR
+STRAPI_API_TOKEN=$STRAPI_TOKEN_VAR
 EOF
 
             # Build
