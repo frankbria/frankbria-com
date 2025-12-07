@@ -75,6 +75,7 @@ jobs:
           echo "pm2_name=${{ vars.PM2_PROCESS_NAME || 'frankbria-nextjs' }}" >> $GITHUB_OUTPUT
           echo "health_url=${{ vars.SITE_URL }}" >> $GITHUB_OUTPUT
           echo "environment=${{ inputs.environment || (github.ref_name == 'master' && 'production' || 'staging') }}" >> $GITHUB_OUTPUT
+          echo "strapi_url=${{ vars.STRAPI_URL }}" >> $GITHUB_OUTPUT
 
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
@@ -87,43 +88,48 @@ jobs:
           ssh-keyscan -H ${{ steps.deploy-config.outputs.host }} >> ~/.ssh/known_hosts
 
       - name: Deploy to ${{ steps.deploy-config.outputs.environment }}
-        env:
-          STRAPI_URL_VAR: ${{ vars.STRAPI_URL }}
-          STRAPI_TOKEN_VAR: ${{ secrets.STRAPI_API_TOKEN }}
         run: |
           echo "🚀 Deploying to ${{ steps.deploy-config.outputs.environment }}..."
 
-          ssh ${{ steps.deploy-config.outputs.user }}@${{ steps.deploy-config.outputs.host }} << 'ENDSSH'
+          # Pass environment variables as arguments to the remote script
+          ssh ${{ steps.deploy-config.outputs.user }}@${{ steps.deploy-config.outputs.host }} \
+            "DEPLOY_PATH='${{ steps.deploy-config.outputs.path }}' \
+             PM2_NAME='${{ steps.deploy-config.outputs.pm2_name }}' \
+             GIT_BRANCH='${{ github.ref_name }}' \
+             STRAPI_URL='${{ vars.STRAPI_URL }}' \
+             STRAPI_TOKEN='${{ secrets.STRAPI_API_TOKEN }}' \
+             bash -s" << 'ENDSSH'
             set -e
 
-            # Load NVM if it exists
-            export NVM_DIR="$$HOME/.nvm"
-            if [ -s "$$NVM_DIR/nvm.sh" ]; then
+            # Load NVM if available
+            export NVM_DIR="$HOME/.nvm"
+            if [ -s "$NVM_DIR/nvm.sh" ]; then
               echo "🔧 Loading NVM..."
-              . "$$NVM_DIR/nvm.sh"
+              . "$NVM_DIR/nvm.sh"
               nvm use 20 || nvm install 20
-              echo "✓ Using Node 20 via NVM"
+              echo "✓ Node version: $(node --version)"
             else
-              echo "⚠️  NVM not found, using system Node"
+              echo "⚠️  NVM not found, using system Node: $(node --version)"
             fi
 
-            echo "📂 Navigating to deployment directory..."
-            cd "${{ steps.deploy-config.outputs.path }}"
+            echo "📂 Navigating to: $DEPLOY_PATH"
+            cd "$DEPLOY_PATH"
 
             # Backup current build
             if [ -d ".next" ]; then
               echo "📦 Backing up current build..."
-              mv .next .next.backup.\$(date +%Y%m%d_%H%M%S)
+              BACKUP_NAME=".next.backup.$(date +%Y%m%d_%H%M%S)"
+              mv .next "$BACKUP_NAME"
               # Keep only last 3 backups
               ls -dt .next.backup.* 2>/dev/null | tail -n +4 | xargs rm -rf 2>/dev/null || true
             fi
 
-            # Pull latest changes
-            echo "⬇️  Pulling latest changes from ${{ github.ref_name }}..."
+            # Pull latest code
+            echo "⬇️  Pulling latest from $GIT_BRANCH..."
             git fetch origin
-            git pull origin ${{ github.ref_name }}
+            git pull origin "$GIT_BRANCH"
 
-            # Install dependencies if package.json changed or node_modules missing
+            # Install dependencies if needed
             if [ ! -d "node_modules" ]; then
               echo "📥 Installing dependencies (first deployment)..."
               npm ci
@@ -131,21 +137,23 @@ jobs:
               echo "📥 Installing dependencies (package.json changed)..."
               npm ci
             else
-              echo "✓ Dependencies unchanged, skipping install"
+              echo "✓ Dependencies unchanged"
             fi
 
             # Create production environment file
             echo "📝 Creating .env.production..."
-            echo "NEXT_PUBLIC_STRAPI_URL=${{ vars.STRAPI_URL }}" > .env.production
-            echo "STRAPI_API_TOKEN=${{ secrets.STRAPI_API_TOKEN }}" >> .env.production
+            cat > .env.production << EOF
+NEXT_PUBLIC_STRAPI_URL=$STRAPI_URL
+STRAPI_API_TOKEN=$STRAPI_TOKEN
+EOF
 
-            # Build
+            # Build Next.js with production env
             echo "🔨 Building Next.js..."
             npm run build
 
-            # Start or restart PM2 process using ecosystem config
-            if pm2 describe ${{ steps.deploy-config.outputs.pm2_name }} > /dev/null 2>&1; then
-              echo "♻️  Restarting PM2 process..."
+            # Restart PM2 with updated environment
+            if pm2 describe "$PM2_NAME" > /dev/null 2>&1; then
+              echo "♻️  Restarting PM2 process with new environment..."
               pm2 restart ecosystem.config.js --update-env
             else
               echo "🚀 Starting PM2 process for first time..."
@@ -153,22 +161,22 @@ jobs:
               pm2 save
             fi
 
-            # Wait for process to be online
+            # Wait and verify
             sleep 5
 
-            # Verify PM2 status
-            if pm2 describe ${{ steps.deploy-config.outputs.pm2_name }} | grep -q "online"; then
+            if pm2 describe "$PM2_NAME" | grep -q "online"; then
               echo "✅ Deployment successful!"
-              # Clean up old backups on success
+              # Clean up old backups
               ls -dt .next.backup.* 2>/dev/null | tail -n +4 | xargs rm -rf 2>/dev/null || true
             else
               echo "❌ PM2 process failed to start!"
-              # Rollback to previous build
-              if [ -d ".next.backup.$(ls -t .next.backup.* 2>/dev/null | head -1)" ]; then
-                echo "⏮️  Rolling back to previous build..."
+              # Rollback
+              LATEST_BACKUP=$(ls -dt .next.backup.* 2>/dev/null | head -1)
+              if [ -n "$LATEST_BACKUP" ]; then
+                echo "⏮️  Rolling back to $LATEST_BACKUP..."
                 rm -rf .next
-                mv $(ls -dt .next.backup.* | head -1) .next
-                pm2 restart ${{ steps.deploy-config.outputs.pm2_name }}
+                mv "$LATEST_BACKUP" .next
+                pm2 restart "$PM2_NAME"
               fi
               exit 1
             fi
@@ -182,10 +190,11 @@ jobs:
           HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${{ steps.deploy-config.outputs.health_url }}")
 
           if [ "$HTTP_CODE" = "200" ]; then
-            echo "✅ Site is responding correctly at ${{ steps.deploy-config.outputs.health_url }}"
+            echo "✅ Site is responding correctly"
+            echo "✅ URL: ${{ steps.deploy-config.outputs.health_url }}"
             echo "✅ HTTP Status: $HTTP_CODE"
           else
-            echo "⚠️  Site health check failed at ${{ steps.deploy-config.outputs.health_url }}"
+            echo "⚠️  Health check failed"
             echo "❌ HTTP Status: $HTTP_CODE (expected 200)"
             exit 1
           fi
