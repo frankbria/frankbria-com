@@ -87,35 +87,35 @@ jobs:
           ssh-keyscan -H ${{ steps.deploy-config.outputs.host }} >> ~/.ssh/known_hosts
 
       - name: Deploy to ${{ steps.deploy-config.outputs.environment }}
+        env:
+          STRAPI_URL_VAR: ${{ vars.STRAPI_URL }}
+          STRAPI_TOKEN_VAR: ${{ secrets.STRAPI_API_TOKEN }}
         run: |
           echo "🚀 Deploying to ${{ steps.deploy-config.outputs.environment }}..."
 
-          ssh ${{ steps.deploy-config.outputs.user }}@${{ steps.deploy-config.outputs.host }} \
-            STRAPI_URL_VAR="${{ vars.STRAPI_URL }}" \
-            STRAPI_TOKEN_VAR="${{ secrets.STRAPI_API_TOKEN }}" \
-            << 'ENDSSH'
+          ssh ${{ steps.deploy-config.outputs.user }}@${{ steps.deploy-config.outputs.host }} << 'ENDSSH'
             set -e
 
             # Load NVM if it exists
-            export NVM_DIR="$HOME/.nvm"
-            if [ -s "$NVM_DIR/nvm.sh" ]; then
+            export NVM_DIR="\$HOME/.nvm"
+            if [ -s "\$NVM_DIR/nvm.sh" ]; then
               echo "🔧 Loading NVM..."
-              . "$NVM_DIR/nvm.sh"
+              . "\$NVM_DIR/nvm.sh"
               nvm use 20 || nvm install 20
-              echo "✓ Using Node $(node --version)"
+              echo "✓ Using Node \$(node --version)"
             else
-              echo "⚠️  NVM not found, using system Node $(node --version)"
+              echo "⚠️  NVM not found, using system Node \$(node --version)"
             fi
 
             echo "📂 Navigating to deployment directory..."
-            DEPLOY_PATH=$(echo "${{ steps.deploy-config.outputs.path }}" | tr -d '\r')
-            cd "$DEPLOY_PATH"
+            DEPLOY_PATH=\$(echo "${{ steps.deploy-config.outputs.path }}" | tr -d '\r')
+            cd "\$DEPLOY_PATH"
 
             # Backup current build
             if [ -d ".next" ]; then
               echo "📦 Backing up current build..."
-              TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-              mv .next .next.backup.$TIMESTAMP
+              TIMESTAMP=\$(date +%Y%m%d_%H%M%S)
+              mv .next .next.backup.\$TIMESTAMP
               # Keep only last 3 backups
               ls -dt .next.backup.* 2>/dev/null | tail -n +4 | xargs rm -rf 2>/dev/null || true
             fi
@@ -138,10 +138,8 @@ jobs:
 
             # Create production environment file
             echo "📝 Creating .env.production..."
-            cat > .env.production << EOF
-NEXT_PUBLIC_STRAPI_URL=$STRAPI_URL_VAR
-STRAPI_API_TOKEN=$STRAPI_TOKEN_VAR
-EOF
+            echo "NEXT_PUBLIC_STRAPI_URL=${{ vars.STRAPI_URL }}" > .env.production
+            echo "STRAPI_API_TOKEN=${{ secrets.STRAPI_API_TOKEN }}" >> .env.production
 
             # Build
             echo "🔨 Building Next.js..."
