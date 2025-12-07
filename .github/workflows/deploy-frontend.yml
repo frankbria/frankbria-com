@@ -133,6 +133,14 @@ jobs:
               echo "✓ Dependencies unchanged, skipping install"
             fi
 
+            # Create production environment file
+            echo "📝 Creating .env.production..."
+            cat > .env.production << 'EOF'
+NEXT_PUBLIC_STRAPI_URL=${{ vars.STRAPI_URL }}
+STRAPI_API_TOKEN=${{ secrets.STRAPI_API_TOKEN }}
+REVALIDATION_SECRET=${{ secrets.REVALIDATION_SECRET || 'change_me' }}
+EOF
+
             # Build
             echo "🔨 Building Next.js..."
             npm run build
