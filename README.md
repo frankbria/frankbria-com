@@ -1,5 +1,7 @@
 # frankbria.com
 
+[![Follow on X](https://img.shields.io/twitter/follow/FrankBria18044?style=social)](https://x.com/FrankBria18044)
+
 Personal website and blog for Frank Bria, migrated from WordPress to a modern JAMstack architecture.
 
 ## Tech Stack
